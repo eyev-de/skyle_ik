@@ -20,10 +20,18 @@ jobs:
         channel: 'stable'
         architecture: x64
     - run: flutter build macos --release
+
+    - name: Archive Release
+      uses: thedoctor0/zip-release@master
+      with:
+        type: 'zip'
+        filename: skyle_ik-macos.zip
+        directory: build/macos/Build/Products/Release
+
     - name: Create Github Release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: 'build/macos/Build/Products/Release/skyle_ik.app'
+        artifacts: 'build/macos/Build/Products/Release/skyle_ik-macos.zip'
         token: ${{ secrets.RELEASES_TOKEN }}
         tag: '1.0.0'
         commit: main

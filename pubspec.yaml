@@ -49,8 +49,8 @@ dependencies:
 dependency_overrides:
   # gaze_interactive:
   #   path: ../flutter_gaze_interactive
-  skyle_api:
-    path: ../dart_skyle_api
+  # skyle_api:
+  #   path: ../dart_skyle_api
 
 dev_dependencies:
   flutter_test:

@@ -455,9 +455,11 @@ packages:
   skyle_api:
     dependency: "direct main"
     description:
-      path: "../dart_skyle_api"
-      relative: true
-    source: path
+      path: "."
+      ref: HEAD
+      resolved-ref: "1fe4d527b8e0ed29470b21aeaafb03eb86cf8931"
+      url: "https://github.com/eyev-de/dart_skyle_api.git"
+    source: git
     version: "0.0.1"
   source_span:
     dependency: transitive

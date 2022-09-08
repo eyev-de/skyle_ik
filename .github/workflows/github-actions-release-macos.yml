@@ -25,5 +25,5 @@ jobs:
       with:
         artifacts: 'build/macos/Build/Products/Release/skyle_ik.app'
         token: ${{ secrets.RELEASES_TOKEN }}
-        tag: 1.0
+        tag: '1.0.0'
         commit: main

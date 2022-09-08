@@ -1,10 +1,10 @@
 name: Release macOS app
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  # push:
+  #   branches: [ main ]
+  # pull_request:
+  #   branches: [ main ]
 
   workflow_dispatch:
 
@@ -25,3 +25,4 @@ jobs:
       with:
         artifacts: 'build/macos/Build/Products/Release/skyle_ik.app'
         token: ${{ secrets.RELEASES_TOKEN }}
+        commit: main

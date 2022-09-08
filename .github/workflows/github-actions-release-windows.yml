@@ -30,4 +30,5 @@ jobs:
       with:
         artifacts: 'build/windows/runner/Release/skyle_ik-windows.zip'
         token: ${{ secrets.RELEASES_TOKEN }}
+        tag: 1.0
         commit: main

@@ -28,13 +28,13 @@ jobs:
         channel: 'stable'
     - run: flutter build windows --release
     - name: Archive Release
-        uses: thedoctor0/zip-release@master
+      uses: thedoctor0/zip-release@master
       with:
-          type: 'zip'
-          filename: skyle_ik-windows.zip
-          directory: build/windows/runner/Release
+        type: 'zip'
+        filename: skyle_ik-windows.zip
+        directory: build/windows/runner/Release
     - name: Create Github Release
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: 'build/windows/runner/Release/skyle_ik-windows.zip'
-          token: ${{ secrets.RELEASES_TOKEN }}
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: 'build/windows/runner/Release/skyle_ik-windows.zip'
+        token: ${{ secrets.RELEASES_TOKEN }}

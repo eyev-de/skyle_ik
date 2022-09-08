@@ -29,7 +29,7 @@ jobs:
         architecture: x64
     - run: flutter build macos --release
     - name: Create Github Release
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: 'build/macos/Build/Products/Release/skyle_ik.app'
-          token: ${{ secrets.RELEASES_TOKEN }}
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: 'build/macos/Build/Products/Release/skyle_ik.app'
+        token: ${{ secrets.RELEASES_TOKEN }}

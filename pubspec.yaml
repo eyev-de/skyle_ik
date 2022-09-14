@@ -1,0 +1,85 @@
+name: skyle_ik
+description: A simple example application to calibrate the Skyle eye-tracker.
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=2.18.0 <3.0.0'
+
+dependencies:
+
+  cupertino_icons: ^1.0.2
+
+  device_info_plus: ^4.1.0
+
+  enum_to_string: ^2.0.0-nullsafety.1
+
+  gaze_interactive:
+    git:
+      url: https://github.com/eyev-de/flutter_gaze_interactive.git
+
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.0.0-dev.9
+  flutter_svg: ^1.0.0
+
+  logger: ^1.1.0
+
+  minimize_app:
+    git:
+      url: https://github.com/krjw-eyev/minimize_app_plugin.git
+  
+  shared_preferences: ^2.0.3
+
+  skyle_api:
+    git:
+      url: https://github.com/eyev-de/dart_skyle_api.git
+
+  universal_platform: ^1.0.0+1
+
+  win32: ^3.0.0
+
+  window_size:
+    git:
+      url: https://github.com/google/flutter-desktop-embedding.git
+      path: plugins/window_size
+
+dependency_overrides:
+  # gaze_interactive:
+  #   path: ../flutter_gaze_interactive
+  # skyle_api:
+  #   path: ../dart_skyle_api
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^2.0.0
+  flutter_launcher_icons: "^0.10.0"
+
+# flutter pub run flutter_launcher_icons:main
+flutter_icons:
+  android: "launcher_icon"
+  ios: false
+  image_path: "assets/images/SkyleXAppIcon.png"
+  web:
+    generate: true
+    image_path: "assets/images/SkyleXAppIcon.png"
+    background_color: "#111111"
+    theme_color: "#111111"
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/SkyleEye.svg
+    - assets/images/SkyleLogoBright/
+
+
+  # fonts:
+  # - family: sficonsets
+  #   fonts:
+  #     - asset: packages/flutter_sfsymbols/fonts/sficonsets.ttf
+

@@ -1,0 +1,39 @@
+name: Release macOS app
+
+on:
+  # push:
+  #   branches: [ main ]
+  # pull_request:
+  #   branches: [ main ]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.3.1'
+        channel: 'stable'
+        architecture: x64
+    - run: flutter build macos --release --split-debug-info=build/macos/Build/Products/debug-info
+
+    - name: Archive Release
+      uses: thedoctor0/zip-release@master
+      with:
+        type: 'zip'
+        filename: skyle_ik-macos.zip
+        directory: build/macos/Build/Products/Release/
+        exclusions: '*.framework/* device_info_plus_macos FlutterMacOS shared_preferences_macos *.dSYM *.swiftmodule windows_size .last_build_id'
+
+    - name: Create Github Release
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: 'build/macos/Build/Products/Release/skyle_ik-macos.zip'
+        token: ${{ secrets.RELEASES_TOKEN }}
+        tag: '1.0.0'
+        commit: main
+        allowUpdates: true

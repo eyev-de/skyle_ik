@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skyle_api/api.dart' as skyle;
+import 'package:skyle_ik/config/positioning_type_notifier.dart';
 import 'package:universal_platform/universal_platform.dart';
 
 import '../util/extensions.dart';
@@ -51,7 +52,7 @@ class _SkyleAppState extends ConsumerState<SkyleApp> with WidgetsBindingObserver
     } else if (state == AppLifecycleState.resumed) {
       // Resume Skyle API
       try {
-        await AppState().et.connect();
+        await AppState().et.connect(grpcPort: 50052);
       } catch (e) {
         print('Failed to connect Skyle in didChangeAppLifecycle. $e');
       }
@@ -73,7 +74,7 @@ class _SkyleAppState extends ConsumerState<SkyleApp> with WidgetsBindingObserver
       } else {
         // Start Skyle API
         try {
-          await AppState().et.connect();
+          await AppState().et.connect(grpcPort: 50052);
         } catch (e) {
           print('Failed to connect Skyle in initState. $e');
         }
@@ -109,6 +110,9 @@ class _SkyleAppState extends ConsumerState<SkyleApp> with WidgetsBindingObserver
       if (connection == skyle.Connection.connected) {
         if (AppState().gazeInteractive.active) {
           await AppState().et.settings.disableMouse();
+        }
+        if (ref.read(AppState().positioningTypeProvider) == PositioningType.video) {
+          await AppState().et.settings.video();
         }
 
         SchedulerBinding.instance.addPostFrameCallback((timeStamp) async {

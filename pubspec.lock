@@ -369,7 +369,7 @@ packages:
       name: path_provider_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.4"
+    version: "2.0.5"
   path_provider_windows:
     dependency: transitive
     description:
@@ -419,6 +419,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "6.0.3"
+  retry:
+    dependency: transitive
+    description:
+      name: retry
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.1.0"
   riverpod:
     dependency: transitive
     description:
@@ -492,7 +499,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "4683fb094390ccb7b5362dff48ae7f8e08a066d2"
+      resolved-ref: "70dd60b8204c7219e46af98cfb9bf0182f47d9ae"
       url: "https://github.com/eyev-de/dart_skyle_api.git"
     source: git
     version: "0.0.1"

@@ -28,7 +28,7 @@ jobs:
         type: 'zip'
         filename: skyle_ik-macos.zip
         directory: build/macos/Build/Products/Release/
-        exclusions: '/*App.framework/* /*FlutterMacOS.framework/* /*Pods_Runner.framework/* /*device_info_plus_macos/* /*FlutterMacOS/* /*shared_preferences_macos/* /*skyle_ik.app.dSYM/* /*skyle_ik.swiftmodule/* /*window_size/* .last_build_id .DS_Store'
+        exclusions: 'App.framework/* FlutterMacOS.framework/* Pods_Runner.framework/* device_info_plus_macos/* FlutterMacOS/* shared_preferences_macos/* skyle_ik.app.dSYM/* skyle_ik.swiftmodule/* window_size/* .last_build_id .DS_Store'
 
     - name: Create Github Release
       uses: ncipollo/release-action@v1

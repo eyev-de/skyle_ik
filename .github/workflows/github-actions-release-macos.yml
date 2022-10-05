@@ -21,20 +21,19 @@ jobs:
         architecture: x64
         cache: true
     - run: flutter build macos --release --split-debug-info=build/macos/Build/Products/debug-info
-
+    - name: Copy app to extra directory
+    - run: mkdir build/macos/Build/Products/Release/skyle_ik-macos; cp -r build/macos/Build/Products/Release/skyle_ik.app build/macos/Build/Products/Release/skyle_ik-macos
     - name: Archive Release
       uses: thedoctor0/zip-release@master
       with:
         type: 'zip'
-        filename: skyle_ik-macos.app.zip
-        directory: build/macos/Build/Products/Release/skyle_ik.app/
-        # exclusions: 'App.framework/* FlutterMacOS.framework/* Pods_Runner.framework/* device_info_plus_macos/* FlutterMacOS/* shared_preferences_macos/* skyle_ik.app.dSYM/* skyle_ik.swiftmodule/* window_size/* .last_build_id .DS_Store'
-        # exclusions: '/*App.framework/* /*FlutterMacOS.framework/* /*Pods_Runner.framework/* /*device_info_plus_macos/* /*FlutterMacOS/* /*shared_preferences_macos/* /*skyle_ik.app.dSYM/* /*skyle_ik.swiftmodule/* /*window_size/* .last_build_id .DS_Store'
+        filename: skyle_ik-macos.zip
+        directory: build/macos/Build/Products/Release/skyle_ik-macos
 
     - name: Create Github Release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: 'build/macos/Build/Products/Release/skyle_ik.app/skyle_ik-macos.app.zip'
+        artifacts: 'build/macos/Build/Products/Release/skyle_ik-macos/skyle_ik-macos.zip'
         token: ${{ secrets.RELEASES_TOKEN }}
         tag: '1.0.0'
         commit: main

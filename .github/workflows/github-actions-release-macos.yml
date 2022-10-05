@@ -21,7 +21,6 @@ jobs:
         architecture: x64
         cache: true
     - run: flutter build macos --release --split-debug-info=build/macos/Build/Products/debug-info
-    - name: Copy app to extra directory
     - run: mkdir build/macos/Build/Products/Release/skyle_ik-macos; cp -r build/macos/Build/Products/Release/skyle_ik.app build/macos/Build/Products/Release/skyle_ik-macos
     - name: Archive Release
       uses: thedoctor0/zip-release@master

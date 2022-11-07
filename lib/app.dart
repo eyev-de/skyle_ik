@@ -52,7 +52,7 @@ class _SkyleAppState extends ConsumerState<SkyleApp> with WidgetsBindingObserver
     } else if (state == AppLifecycleState.resumed) {
       // Resume Skyle API
       try {
-        await AppState().et.connect(grpcPort: 50051);
+        await AppState().et.connect(grpcPort: Configuration.grpcPort);
       } catch (e) {
         print('Failed to connect Skyle in didChangeAppLifecycle. $e');
       }
@@ -74,7 +74,7 @@ class _SkyleAppState extends ConsumerState<SkyleApp> with WidgetsBindingObserver
       } else {
         // Start Skyle API
         try {
-          await AppState().et.connect(grpcPort: 50051);
+          await AppState().et.connect(grpcPort: Configuration.grpcPort);
         } catch (e) {
           print('Failed to connect Skyle in initState. $e');
         }
@@ -165,8 +165,8 @@ class _SkyleAppState extends ConsumerState<SkyleApp> with WidgetsBindingObserver
                   print(currentSettings.data);
                   skyle.IPadOS iPadOS = currentSettings.data!.iPadOS.copyWith();
                   bool changed = false;
-                  if (iPadOS.isNotZommed != !zoomed) {
-                    iPadOS = iPadOS.copyWith(isNotZommed: !zoomed);
+                  if (iPadOS.isNotZoomed != !zoomed) {
+                    iPadOS = iPadOS.copyWith(isNotZoomed: !zoomed);
                     changed = true;
                     print('Reset because of isNotZoomed ${!zoomed}');
                   }

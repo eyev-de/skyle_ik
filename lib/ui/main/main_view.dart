@@ -6,6 +6,7 @@
 
 import 'dart:io';
 
+import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gaze_interactive/gaze_interactive.dart';
@@ -16,9 +17,11 @@ import 'package:universal_platform/universal_platform.dart';
 import '../../config/routes/main_routes.dart';
 import '../../config/routes/routes.dart';
 import '../../config/app_state.dart';
+
 import '../../util/responsive.dart';
 import '../settings/gaze_speed_settings.dart';
 import 'logo.dart';
+import 'search_for_update_button.dart';
 import 'theme.dart';
 import '../stream/stream_view.dart';
 import '../calibration/calibration_points_view.dart';
@@ -29,6 +32,8 @@ class MainView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final connection = ref.watch(AppState().connectionProvider).valueOrNull ?? Connection.disconnected;
+    final beta = ref.watch(AppState().betaFirmwareProvider);
+    final update = ref.watch(AppState().checkForUpdateProvider(beta)).valueOrNull ?? const DataFailed('error');
     return Stack(
       children: [
         Container(color: Colors.black),
@@ -36,7 +41,7 @@ class MainView extends ConsumerWidget {
           children: [
             Flexible(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   Flexible(
                     flex: 2,
@@ -45,6 +50,16 @@ class MainView extends ConsumerWidget {
                   const Spacer(
                     flex: 3,
                   ),
+                  Badge(
+                    position: const BadgePosition(top: 20, end: 10),
+                    badgeContent: const Padding(
+                      padding: EdgeInsets.all(5),
+                      child: Text('1'),
+                    ),
+                    showBadge: update is DataSuccess && update.data!.newupdate,
+                    child: Container(),
+                  ),
+                  SearchForFirmwareUpdateButton(),
                   _ExitButton(),
                 ],
               ),

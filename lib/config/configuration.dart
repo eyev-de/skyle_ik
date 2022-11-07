@@ -17,4 +17,6 @@ class Configuration {
   static String mjpegURL = 'http://${ET.baseURL}:8080/?action=stream';
 
   static const bool simulateET = kDebugMode && false;
+
+  static const grpcPort = 50051;
 }

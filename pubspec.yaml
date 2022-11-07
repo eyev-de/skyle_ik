@@ -10,15 +10,20 @@ environment:
 
 dependencies:
 
+  badges: ^2.0.3
+  
   cupertino_icons: ^1.0.2
 
-  device_info_plus: ^4.1.0
+  device_info_plus: ^8.0.0
 
   enum_to_string: ^2.0.0-nullsafety.1
 
   gaze_interactive:
     git:
       url: https://github.com/eyev-de/flutter_gaze_interactive.git
+
+  http: ^0.13.5
+  http_parser: ^4.0.2
 
   flutter:
     sdk: flutter
@@ -32,6 +37,9 @@ dependencies:
       url: https://github.com/krjw-eyev/minimize_app_plugin.git
   
   shared_preferences: ^2.0.3
+
+  path: ^1.8.2
+  path_provider: ^2.0.11
 
   skyle_api:
     git:

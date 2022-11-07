@@ -16,6 +16,11 @@ import '../config/routes/main_navigator_state.dart';
 import '../config/routes/main_route_information_parser.dart';
 import '../config/routes/main_router_delegate.dart';
 import '../config/routes/route_state.dart';
+import '../data/models/update/release_notes_response.dart';
+import '../data/models/update/update_response.dart';
+import '../data/models/update/update_state.dart';
+import '../data/repositories/update_repository_impl.dart';
+import '../domain/repositories/update_repository.dart';
 import 'local_settings_notifiers.dart';
 import 'positioning_type_notifier.dart';
 
@@ -71,6 +76,67 @@ class AppState {
 
   final calibrationPointsProvider = StateNotifierProvider<CalibrationPointsLocalNotifier, skyle.CalibrationPoints>((ref) {
     return CalibrationPointsLocalNotifier();
+  });
+
+  final updateRepositoryProvider = Provider<UpdateRepository>((ref) => UpdateRepositoryImpl());
+
+  // This provider always takes at least 500 milliseconds to provide a value.
+  // This is for animation purposes.
+  final checkForUpdateProvider = FutureProvider.autoDispose.family<skyle.DataState<UpdateResponse>, bool>((ref, beta) async {
+    ref.keepAlive();
+    const int minTimeInMilliseconds = 500;
+    final stopwatch = Stopwatch()..start();
+    skyle.DataState<UpdateResponse> ret = const skyle.DataFailed<UpdateResponse>('checkForUpdateProvider error: Skyle is not connected.');
+    final connection = await ref.watch(AppState().connectionProvider.future);
+    final repository = ref.watch(AppState().updateRepositoryProvider);
+    if (connection == skyle.Connection.connected) {
+      try {
+        final versions = await ref.watch(AppState().versionsProvider.future);
+        if (versions is skyle.DataSuccess) ret = await repository.tryCheckForUpdate(versions.data!.firmware, versions.data!.serial, beta: beta);
+      } catch (e) {
+        ret = skyle.DataFailed<UpdateResponse>(e.toString());
+      }
+    }
+    if (stopwatch.elapsed.inMilliseconds < minTimeInMilliseconds) {
+      await Future.delayed(Duration(milliseconds: minTimeInMilliseconds - stopwatch.elapsed.inMilliseconds));
+    }
+    return ret;
+  });
+
+  final releaseNotesProvider = FutureProvider.autoDispose.family<skyle.DataState<ReleaseNotesResponse>?, bool>((ref, beta) async {
+    ref.keepAlive();
+    final connection = await ref.watch(AppState().connectionProvider.future);
+    final repository = ref.watch(AppState().updateRepositoryProvider);
+    if (connection == skyle.Connection.connected) {
+      try {
+        final update = await ref.watch(AppState().checkForUpdateProvider(beta).future);
+        final versions = await ref.watch(AppState().versionsProvider.future);
+        if (update is skyle.DataSuccess && versions is skyle.DataSuccess) return repository.getReleaseNotes(update.data!.version, versions.data!.serial);
+      } catch (e) {
+        // skyleLogger?.i(e.toString());
+      }
+    }
+    return null;
+  });
+
+  final isBetaProvider = FutureProvider.autoDispose<skyle.DataState<bool>>((ref) async {
+    final connection = await ref.watch(AppState().connectionProvider.future);
+    try {
+      if (connection == skyle.Connection.connected) {
+        final versions = await ref.watch(AppState().versionsProvider.future);
+        if (versions is skyle.DataSuccess) {
+          return ref.watch(AppState().updateRepositoryProvider).isBeta(versions.data!.serial);
+        }
+        return const skyle.DataFailed('Error checking if Skyle isBeta device.');
+      }
+      return const skyle.DataFailed('Error checking if Skyle isBeta device: Device disconnected');
+    } catch (e) {
+      return skyle.DataFailed('Error checking if Skyle isBeta device: ${e.toString()}');
+    }
+  });
+
+  final betaFirmwareProvider = StateNotifierProvider<BetaFirmwareLocalNotifier, bool>((ref) {
+    return BetaFirmwareLocalNotifier();
   });
 
   final GazeInteractive gazeInteractive = GazeInteractive();

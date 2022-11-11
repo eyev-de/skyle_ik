@@ -121,11 +121,18 @@ class _CalibrationPointsSelection extends ConsumerWidget {
                     properties: GazeButtonProperties(
                       key: GlobalKey(),
                       backgroundColor: backgroundColor,
-                      borderColor: borderColor,
                       gazeInteractive: points != item,
-                      child: CalibrationPointsView(
-                        points: item.array,
-                        color: Colors.yellow,
+                      child: Container(
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: borderColor,
+                              width: 3,
+                            )),
+                        child: CalibrationPointsView(
+                          points: item.array,
+                          color: Colors.yellow,
+                        ),
                       ),
                       route: MainRoutes.home.path,
                     ),

@@ -1,10 +1,10 @@
 name: Release Android app
 
 on:
-#   push:
-#     branches: [ main ]
-#   pull_request:
-#     branches: [ main ]
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
   workflow_dispatch:
 
@@ -38,6 +38,6 @@ jobs:
       with:
         artifacts: 'build/app/outputs/apk/release/skyle_ik-android.zip'
         token: ${{ secrets.RELEASES_TOKEN }}
-        tag: '1.1.0'
+        tag: '1.1.1'
         commit: main
         allowUpdates: true

@@ -6,7 +6,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gaze_interactive/gaze_interactive.dart';
+import 'package:gaze_interactive/api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skyle_api/api.dart' as skyle;
 import 'package:universal_platform/universal_platform.dart';

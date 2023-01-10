@@ -8,7 +8,7 @@ import 'package:async/async.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gaze_interactive/gaze_interactive.dart';
+import 'package:gaze_interactive/api.dart';
 import 'package:skyle_api/api.dart';
 
 import '../../config/app_state.dart';
@@ -66,7 +66,6 @@ class SearchForFirmwareUpdateButton extends ConsumerWidget {
     return Builder(
       builder: (context) => GazeButton(
         properties: GazeButtonProperties(
-          key: GlobalKey(),
           text: data is DataSuccess && data.data!.newupdate ? 'Update firmware' : 'Search for firmware update',
           textStyle: const TextStyle(color: Colors.white, fontSize: 11),
           icon: Icon(
@@ -82,7 +81,7 @@ class SearchForFirmwareUpdateButton extends ConsumerWidget {
             await showUpdateInstallDialog(context);
           } else {
             final beta = ref.read(AppState().betaFirmwareProvider);
-            ref.refresh(AppState().checkForUpdateProvider(beta));
+            final _ = ref.refresh(AppState().checkForUpdateProvider(beta));
           }
         },
       ),
@@ -136,6 +135,11 @@ class SearchForFirmwareUpdateButton extends ConsumerWidget {
     late final updatingProvider = StreamProvider.autoDispose<DataState<UpdateState>>((ref) async* {
       final connection = await ref.watch(AppState().connectionProvider.future);
       if (connection == Connection.connecting) return;
+      if (ref.read(updatingStateProvider) == UpdateState.uploaded && connection == Connection.disconnected) {
+        yield const DataSuccess(UpdateState.updating);
+        ref.read(updatingStateProvider.notifier).state = UpdateState.updating;
+        return;
+      }
       if (ref.read(updatingStateProvider) == UpdateState.updating && connection == Connection.connected) {
         yield const DataSuccess(UpdateState.finished);
         ref.read(updatingStateProvider.notifier).state = UpdateState.none;
@@ -143,11 +147,7 @@ class SearchForFirmwareUpdateButton extends ConsumerWidget {
       }
       final updatingStateStream = ref.watch(combinedDownloadingAndUploadingUpdateProvider.stream);
       await for (final updatingState in updatingStateStream) {
-        if (updatingState is DataSuccess && updatingState.data! == UpdateState.uploaded && connection == Connection.disconnected) {
-          yield const DataSuccess(UpdateState.updating);
-          ref.read(updatingStateProvider.notifier).state = UpdateState.updating;
-          return;
-        }
+        if (updatingState is DataSuccess) ref.read(updatingStateProvider.notifier).state = updatingState.data!;
         yield updatingState;
       }
     });
@@ -182,7 +182,7 @@ class SearchForFirmwareUpdateButton extends ConsumerWidget {
                   Radius.circular(20),
                 ),
               ),
-              title: const Text('Update Firmware'),
+              title: const Text('Update firmware'),
               content: SizedBox(
                 width: 500,
                 height: 220,
@@ -202,7 +202,7 @@ class SearchForFirmwareUpdateButton extends ConsumerWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(failed ? '' : 'Installed update successfully.'),
+                              Text(failed ? 'The firmware update has failed. Please try again later.' : 'Firmware update was installed successfully.'),
                               Padding(
                                 padding: const EdgeInsets.only(left: 20),
                                 child: Icon(
@@ -249,7 +249,6 @@ class SearchForFirmwareUpdateButton extends ConsumerWidget {
                           Expanded(
                             child: GazeButton(
                               properties: GazeButtonProperties(
-                                key: GlobalKey(),
                                 text: 'Cancel',
                                 textColor: uploading || uploaded || updating || finished ? Colors.grey : Colors.red,
                                 route: GazeInteractive().currentRoute,
@@ -266,7 +265,6 @@ class SearchForFirmwareUpdateButton extends ConsumerWidget {
                           Expanded(
                             child: GazeButton(
                               properties: GazeButtonProperties(
-                                key: GlobalKey(),
                                 text: finished || failed ? 'Dismiss' : 'Install',
                                 textColor: downloaded || finished ? Colors.blue : Colors.grey,
                                 gazeInteractive: false,

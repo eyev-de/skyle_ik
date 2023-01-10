@@ -6,7 +6,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gaze_interactive/gaze_interactive.dart';
+import 'package:gaze_interactive/api.dart';
 import 'package:skyle_api/api.dart';
 
 import '../../config/routes/main_routes.dart';
@@ -126,7 +126,6 @@ class StreamView extends ConsumerWidget {
             padding: Responsive.padding(context, const EdgeInsets.fromLTRB(0, 20, 10, 20)),
             child: GazeButton(
               properties: GazeButtonProperties(
-                key: GlobalKey(),
                 text: 'Video',
                 icon: Icon(
                   Icons.videocam,
@@ -157,7 +156,6 @@ class StreamView extends ConsumerWidget {
             padding: Responsive.padding(context, const EdgeInsets.fromLTRB(10, 20, 0, 20)),
             child: GazeButton(
               properties: GazeButtonProperties(
-                key: GlobalKey(),
                 text: 'Positioning',
                 icon: Icon(
                   Icons.remove_red_eye,

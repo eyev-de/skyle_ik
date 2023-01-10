@@ -5,7 +5,7 @@
 //
 
 import 'package:flutter/material.dart';
-import 'package:gaze_interactive/gaze_interactive.dart';
+import 'package:gaze_interactive/api.dart';
 
 import '../main/theme.dart';
 
@@ -49,7 +49,6 @@ class LogoButton extends StatelessWidget {
               height: 100,
               child: GazeButton(
                 properties: GazeButtonProperties(
-                  key: GlobalKey(),
                   text: 'Done',
                   backgroundColor: SkyleTheme.of(context).primaryColor,
                   gazeInteractive: visible,

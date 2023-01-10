@@ -6,7 +6,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gaze_interactive/gaze_interactive.dart';
+import 'package:gaze_interactive/api.dart';
 import 'package:skyle_ik/ui/main/theme.dart';
 import 'package:skyle_ik/util/responsive.dart';
 
@@ -39,7 +39,6 @@ class GazeSlider extends ConsumerWidget {
           height: size,
           child: GazeButton(
             properties: GazeButtonProperties(
-              key: GlobalKey(),
               route: route,
               icon: Icon(
                 Icons.arrow_upward,
@@ -81,7 +80,6 @@ class GazeSlider extends ConsumerWidget {
           height: size,
           child: GazeButton(
             properties: GazeButtonProperties(
-              key: GlobalKey(),
               route: route,
               icon: Icon(
                 Icons.arrow_downward,

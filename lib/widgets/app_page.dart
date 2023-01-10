@@ -5,7 +5,7 @@
 //
 
 import 'package:flutter/material.dart';
-import 'package:gaze_interactive/gaze_interactive.dart';
+import 'package:gaze_interactive/api.dart';
 
 import '../../util/responsive.dart';
 import '../config/routes/routes.dart';
@@ -41,7 +41,6 @@ class AppPage extends StatelessWidget {
                 padding: Responsive.padding(context, const EdgeInsets.all(20)),
                 child: GazeButton(
                   properties: GazeButtonProperties(
-                    key: GlobalKey(),
                     innerPadding: Responsive.padding(context, const EdgeInsets.fromLTRB(20, 20, 100, 20)),
                     text: 'back',
                     textColor: Colors.blue,
@@ -68,7 +67,6 @@ class AppPage extends StatelessWidget {
                   padding: Responsive.padding(context, const EdgeInsets.fromLTRB(0, 20, 200, 0)),
                   child: GazeButton(
                     properties: GazeButtonProperties(
-                      key: GlobalKey(),
                       icon: Icon(
                         Icons.help,
                         color: Colors.white,

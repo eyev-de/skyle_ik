@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gaze_interactive/api.dart';
 import 'package:skyle_api/api.dart' as skyle;
 import 'package:skyle_ik/config/positioning_type_notifier.dart';
 import 'package:universal_platform/universal_platform.dart';
@@ -108,7 +109,7 @@ class _SkyleAppState extends ConsumerState<SkyleApp> with WidgetsBindingObserver
   Future<void> _connectionListener(skyle.Connection connection) async {
     try {
       if (connection == skyle.Connection.connected) {
-        if (AppState().gazeInteractive.active) {
+        if (GazeInteractive().active) {
           await AppState().et.settings.disableMouse();
         }
         if (ref.read(AppState().positioningTypeProvider) == PositioningType.video) {

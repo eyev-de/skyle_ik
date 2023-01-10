@@ -6,7 +6,7 @@
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gaze_interactive/state.dart';
+import 'package:gaze_interactive/api.dart';
 import '../routes/main_routes.dart';
 
 import '../app_state.dart';

@@ -9,7 +9,7 @@ import 'dart:io';
 import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gaze_interactive/gaze_interactive.dart';
+import 'package:gaze_interactive/api.dart';
 import 'package:minimize_app/minimize_app.dart';
 import 'package:skyle_api/api.dart';
 import 'package:universal_platform/universal_platform.dart';
@@ -59,7 +59,7 @@ class MainView extends ConsumerWidget {
                     showBadge: update is DataSuccess && update.data!.newupdate,
                     child: Container(),
                   ),
-                  SearchForFirmwareUpdateButton(),
+                  const SearchForFirmwareUpdateButton(),
                   _ExitButton(),
                 ],
               ),
@@ -119,7 +119,6 @@ class _CalibrationPointsSelection extends ConsumerWidget {
                   padding: Responsive.padding(context, const EdgeInsets.fromLTRB(20, 25, 20, 25)),
                   child: GazeButton(
                     properties: GazeButtonProperties(
-                      key: GlobalKey(),
                       backgroundColor: backgroundColor,
                       gazeInteractive: points != item,
                       child: Container(
@@ -159,7 +158,6 @@ class _StartButton extends StatelessWidget {
         padding: Responsive.padding(context, const EdgeInsets.all(20)),
         child: GazeButton(
           properties: GazeButtonProperties(
-            key: GlobalKey(),
             backgroundColor: SkyleTheme.of(context).primaryColor,
             text: 'Calibrate',
             icon: Icon(
@@ -186,7 +184,6 @@ class _ExitButton extends ConsumerWidget {
         padding: Responsive.padding(context, const EdgeInsets.all(20)),
         child: GazeButton(
           properties: GazeButtonProperties(
-            key: GlobalKey(),
             text: 'Exit',
             backgroundColor: SkyleTheme.of(context).primaryColor,
             icon: Icon(

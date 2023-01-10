@@ -8,7 +8,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gaze_interactive/gaze_interactive.dart';
+import 'package:gaze_interactive/api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skyle_api/api.dart' as skyle;
 
@@ -18,7 +18,6 @@ import '../config/routes/main_router_delegate.dart';
 import '../config/routes/route_state.dart';
 import '../data/models/update/release_notes_response.dart';
 import '../data/models/update/update_response.dart';
-import '../data/models/update/update_state.dart';
 import '../data/repositories/update_repository_impl.dart';
 import '../domain/repositories/update_repository.dart';
 import 'local_settings_notifiers.dart';
@@ -139,8 +138,6 @@ class AppState {
     return BetaFirmwareLocalNotifier();
   });
 
-  final GazeInteractive gazeInteractive = GazeInteractive();
-
   static final AppState _instance = AppState._internal();
 
   factory AppState() {
@@ -191,7 +188,7 @@ class AppState {
     gazeStream = et.gaze.start();
     gazeStreamSubscription = gazeStream!.listen((gaze) async {
       if (gaze is skyle.DataSuccess) {
-        gazeInteractive.onGaze(Offset(gaze.data!.x, gaze.data!.y));
+        GazeInteractive().onGaze(Offset(gaze.data!.x, gaze.data!.y));
         gazeStreamController.add(Offset(gaze.data!.x, gaze.data!.y));
       } else if (gaze is skyle.DataFailed) {
         await _stopGazeStream();

@@ -9,7 +9,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:gaze_interactive/gaze_interactive.dart';
+import 'package:gaze_interactive/api.dart';
 import 'package:skyle_api/api.dart' as skyle;
 
 import '../../config/routes/main_routes.dart';
@@ -112,7 +112,7 @@ class _CalibrationViewState extends ConsumerState<CalibrationView> with SingleTi
       print('finished calibration...');
       SchedulerBinding.instance.addPostFrameCallback((_) async {
         await Future.delayed(const Duration(seconds: 1));
-        if (AppState().gazeInteractive.active) {
+        if (GazeInteractive().active) {
           await AppState().et.settings.disableMouse();
         }
       });
@@ -162,7 +162,7 @@ class _CalibrationViewState extends ConsumerState<CalibrationView> with SingleTi
               SchedulerBinding.instance.addPostFrameCallback((_) async {
                 await AppState().et.calibration.abort();
                 await Future.delayed(const Duration(seconds: 1));
-                if (AppState().gazeInteractive.active) {
+                if (GazeInteractive().active) {
                   await AppState().et.settings.disableMouse();
                 }
               });

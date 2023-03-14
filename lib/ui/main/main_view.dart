@@ -6,7 +6,7 @@
 
 import 'dart:io';
 
-import 'package:badges/badges.dart';
+import 'package:badges/badges.dart' as badges;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gaze_interactive/api.dart';
@@ -50,8 +50,8 @@ class MainView extends ConsumerWidget {
                   const Spacer(
                     flex: 3,
                   ),
-                  Badge(
-                    position: const BadgePosition(top: 20, end: 10),
+                  badges.Badge(
+                    position: badges.BadgePosition.topEnd(top: 20, end: 10),
                     badgeContent: const Padding(
                       padding: EdgeInsets.all(5),
                       child: Text('1'),

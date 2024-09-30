@@ -34,7 +34,6 @@ jobs:
       uses: ncipollo/release-action@v1
       with:
         artifacts: 'build/ios/iphoneos/skyle_ik-ios.zip'
-        token: ${{ secrets.RELEASES_TOKEN }}
         tag: '2.0.0'
         commit: main
         allowUpdates: true

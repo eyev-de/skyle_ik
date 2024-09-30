@@ -37,7 +37,6 @@ jobs:
       uses: ncipollo/release-action@v1
       with:
         artifacts: 'build/app/outputs/apk/release/skyle_ik-android.zip'
-        token: ${{ secrets.RELEASES_TOKEN }}
         tag: '2.0.0'
         commit: main
         allowUpdates: true

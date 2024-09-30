@@ -48,7 +48,7 @@ class Routes {
     currentRoute += '/dialog';
   }
 
-  static bool gazeInteractionPredicate(Rect itemRect, Rect gazePointerRect, String itemRoute, String currentRoute) {
+  static PredicateReturnState gazeInteractionPredicate(Rect itemRect, Rect gazePointerRect, Rect gazeSnapPointerRect, String itemRoute, String currentRoute) {
     // final intersection = itemRect.intersect(gazePointerRect);
     // if (intersection.width.isNegative || intersection.height.isNegative) return false;
     // final intersectionArea = intersection.width * intersection.height;
@@ -59,15 +59,15 @@ class Routes {
     // skyleLogger?.i('$itemRoute ?== $currentRoute');
     if (currentRoute.endsWith('dialog')) {
       if (itemRoute == currentRoute && itemRect.contains(gazePointerRect.center)) {
-        return true;
+        return PredicateReturnState.gaze;
       } else {
-        return false;
+        return PredicateReturnState.none;
       }
     }
     // Check in case of Regular Route
     if ((itemRoute == currentRoute) && itemRect.contains(gazePointerRect.center)) {
-      return true;
+      return PredicateReturnState.gaze;
     }
-    return false;
+    return PredicateReturnState.none;
   }
 }

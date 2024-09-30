@@ -53,7 +53,8 @@ class _SkyleAppState extends ConsumerState<SkyleApp> with WidgetsBindingObserver
     } else if (state == AppLifecycleState.resumed) {
       // Resume Skyle API
       try {
-        await AppState().et.connect(grpcPort: Configuration.grpcPort);
+        final skyleType = ref.read(AppState().skyleTypeProvider);
+        await AppState().et.connect(grpcPort: skyleType.port);
       } catch (e) {
         print('Failed to connect Skyle in didChangeAppLifecycle. $e');
       }
@@ -75,7 +76,8 @@ class _SkyleAppState extends ConsumerState<SkyleApp> with WidgetsBindingObserver
       } else {
         // Start Skyle API
         try {
-          await AppState().et.connect(grpcPort: Configuration.grpcPort);
+          final skyleType = ref.read(AppState().skyleTypeProvider);
+          await AppState().et.connect(grpcPort: skyleType.port);
         } catch (e) {
           print('Failed to connect Skyle in initState. $e');
         }

@@ -5,13 +5,15 @@
 //
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:skyle_api/api.dart';
 
+import '../../config/app_state.dart';
 import '../main/theme.dart';
 
 // https://github.com/amsokol/flutter-grpc-tutorial/blob/master/flutter_client/lib/api/chat_service.dart
 
-class GuidedStreamView extends StatelessWidget {
+class GuidedStreamView extends ConsumerWidget {
   final Point leftEye;
   final Point rightEye;
   final double opacity;
@@ -30,7 +32,7 @@ class GuidedStreamView extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     double size = 70;
     switch (state) {
       case PositioningDistance.close:
@@ -44,6 +46,8 @@ class GuidedStreamView extends StatelessWidget {
       case PositioningDistance.normal:
         break;
     }
+
+    final skyleVersion = ref.watch(AppState().skyleVersionProvider);
 
     return Stack(
       fit: StackFit.expand,
@@ -65,8 +69,8 @@ class GuidedStreamView extends StatelessWidget {
         ),
         AnimatedPositioned(
           key: const Key('LeftEye'),
-          left: leftEye.x / PositioningRepository.width * maxWidth - size / 2,
-          top: leftEye.y / PositioningRepository.height * maxHeight - size / 2,
+          left: leftEye.x / AppState().et.resolution(skyleVersion.version).width * maxWidth - size / 2,
+          top: leftEye.y / AppState().et.resolution(skyleVersion.version).height * maxHeight - size / 2,
           duration: const Duration(milliseconds: 30),
           child: AnimatedContainer(
             width: size,
@@ -80,8 +84,8 @@ class GuidedStreamView extends StatelessWidget {
         ),
         AnimatedPositioned(
           key: const Key('RightEye'),
-          left: rightEye.x / PositioningRepository.width * maxWidth - size / 2,
-          top: rightEye.y / PositioningRepository.height * maxHeight - size / 2,
+          left: rightEye.x / AppState().et.resolution(skyleVersion.version).width * maxWidth - size / 2,
+          top: rightEye.y / AppState().et.resolution(skyleVersion.version).height * maxHeight - size / 2,
           duration: const Duration(milliseconds: 30),
           child: AnimatedContainer(
             width: size,
@@ -99,7 +103,7 @@ class GuidedStreamView extends StatelessWidget {
             opacity: state == PositioningDistance.close ? 1.0 : 0.0,
             child: Text(
               'You are too close, please increase the distance to Skyle.',
-              style: SkyleTheme.of(context).primaryTextTheme.bodyText1,
+              style: SkyleTheme.of(context).primaryTextTheme.bodyLarge,
             ),
           ),
         ),
@@ -109,7 +113,7 @@ class GuidedStreamView extends StatelessWidget {
             opacity: state == PositioningDistance.far ? 1.0 : 0.0,
             child: Text(
               'You are too far away, please move closer to Skyle.',
-              style: SkyleTheme.of(context).primaryTextTheme.bodyText1,
+              style: SkyleTheme.of(context).primaryTextTheme.bodyLarge,
             ),
           ),
         ),

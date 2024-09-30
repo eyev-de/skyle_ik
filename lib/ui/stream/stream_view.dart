@@ -16,17 +16,17 @@ import '../../util/responsive.dart';
 import '../main/theme.dart';
 import '../stream/guided_stream_container_view.dart';
 import 'mjpeg/mjpeg_view.dart';
+import 'raw_image_view.dart';
 
 class StreamView extends ConsumerWidget {
   final PositioningTypeNotifier state;
-  StreamView({Key? key})
-      : state = PositioningTypeNotifier(),
-        super(key: key);
+  StreamView({super.key}) : state = PositioningTypeNotifier();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final connection = ref.watch(AppState().connectionProvider).valueOrNull ?? Connection.disconnected;
     final positioningType = ref.watch(AppState().positioningTypeProvider);
+    final skyleVersion = ref.watch(AppState().skyleVersionProvider);
 
     return Column(
       children: [
@@ -37,7 +37,7 @@ class StreamView extends ConsumerWidget {
               padding: Responsive.padding(context, const EdgeInsets.fromLTRB(0, 20, 0, 0)),
               child: Text(
                 'Skyle IK',
-                style: SkyleTheme.of(context).primaryTextTheme.headline1,
+                style: SkyleTheme.of(context).primaryTextTheme.headlineLarge,
               ),
             ),
           ],
@@ -47,7 +47,7 @@ class StreamView extends ConsumerWidget {
             padding: Responsive.padding(context, const EdgeInsets.fromLTRB(0, 20, 0, 0)),
             child: Text(
               'Skyle is not connected...',
-              style: SkyleTheme.of(context).primaryTextTheme.bodyText1,
+              style: SkyleTheme.of(context).primaryTextTheme.bodyLarge,
             ),
           ),
         if (connection == Connection.connected) _buttons(context, ref, true, positioningType == PositioningType.guided),
@@ -57,9 +57,11 @@ class StreamView extends ConsumerWidget {
               padding: Responsive.padding(context, const EdgeInsets.fromLTRB(20, 0, 20, 20)),
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  var maxWidth = constraints.maxHeight * PositioningRepository.width / PositioningRepository.height;
+                  var maxWidth =
+                      constraints.maxHeight * AppState().et.resolution(skyleVersion.version).width / AppState().et.resolution(skyleVersion.version).height;
                   if (maxWidth > constraints.maxWidth) maxWidth = constraints.maxWidth;
-                  var maxHeight = constraints.maxWidth * PositioningRepository.height / PositioningRepository.width;
+                  var maxHeight =
+                      constraints.maxWidth * AppState().et.resolution(skyleVersion.version).height / AppState().et.resolution(skyleVersion.version).width;
                   if (maxHeight > constraints.maxHeight) maxHeight = constraints.maxHeight;
                   return ConstrainedBox(
                     constraints: BoxConstraints(maxHeight: maxHeight, maxWidth: maxWidth),
@@ -91,27 +93,28 @@ class StreamView extends ConsumerWidget {
   Widget _mjpeg(BuildContext context, double width, double height) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
-      child: MjpegView(
-        width: width,
-        height: height,
-        fit: BoxFit.fill,
-        error: (context, error) {
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.videocam_off,
-                    color: SkyleTheme.of(context).primaryColor,
-                  ),
-                ],
-              ),
-            ],
-          );
-        },
-      ),
+      child: const RawImageView(),
+      // MjpegView(
+      //   width: width,
+      //   height: height,
+      //   fit: BoxFit.fill,
+      //   error: (context, error) {
+      //     return Column(
+      //       mainAxisAlignment: MainAxisAlignment.center,
+      //       children: [
+      //         Row(
+      //           mainAxisAlignment: MainAxisAlignment.center,
+      //           children: [
+      //             Icon(
+      //               Icons.videocam_off,
+      //               color: SkyleTheme.of(context).primaryColor,
+      //             ),
+      //           ],
+      //         ),
+      //       ],
+      //     );
+      //   },
+      // ),
     );
   }
 
@@ -125,15 +128,15 @@ class StreamView extends ConsumerWidget {
           child: Padding(
             padding: Responsive.padding(context, const EdgeInsets.fromLTRB(0, 20, 10, 20)),
             child: GazeButton(
+              color: Colors.grey.shade900,
               properties: GazeButtonProperties(
-                text: 'Video',
+                text: const Text('Video'),
                 icon: Icon(
                   Icons.videocam,
                   color: Colors.white,
                   size: Responsive.getResponsiveValue(forLargeScreen: 35, forMediumScreen: 20, context: context),
                 ),
-                horizontal: true,
-                backgroundColor: Colors.grey.shade900,
+                direction: Axis.horizontal,
                 borderColor: guided
                     ? Colors.transparent
                     : connected
@@ -155,15 +158,15 @@ class StreamView extends ConsumerWidget {
           child: Padding(
             padding: Responsive.padding(context, const EdgeInsets.fromLTRB(10, 20, 0, 20)),
             child: GazeButton(
+              color: Colors.grey.shade900,
               properties: GazeButtonProperties(
-                text: 'Positioning',
+                text: const Text('Positioning'),
                 icon: Icon(
                   Icons.remove_red_eye,
                   color: Colors.white,
                   size: Responsive.getResponsiveValue(forLargeScreen: 35, forMediumScreen: 20, context: context),
                 ),
-                horizontal: true,
-                backgroundColor: Colors.grey.shade900,
+                direction: Axis.horizontal,
                 borderColor: guided
                     ? connected
                         ? SkyleTheme.of(context).primaryColor

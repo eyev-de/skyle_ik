@@ -31,7 +31,7 @@ enum MainRoutes {
       case MainRoutes.home:
         return PageWrapper(
           key: ValueKey(fromPath(path)),
-          child: const MainView(),
+          child: MainView(),
         );
       case MainRoutes.capture:
         return PageWrapper(

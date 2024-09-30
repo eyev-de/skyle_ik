@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:badges/badges.dart' as badges;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gaze_interactive/api.dart';
 import 'package:minimize_app/minimize_app.dart';
@@ -27,13 +28,14 @@ import '../stream/stream_view.dart';
 import '../calibration/calibration_points_view.dart';
 
 class MainView extends ConsumerWidget {
-  const MainView({Key? key}) : super(key: key);
+  MainView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final connection = ref.watch(AppState().connectionProvider).valueOrNull ?? Connection.disconnected;
     final beta = ref.watch(AppState().betaFirmwareProvider);
     final update = ref.watch(AppState().checkForUpdateProvider(beta)).valueOrNull ?? const DataFailed('error');
+    final versions = ref.watch(AppState().versionsProvider).valueOrNull ?? const DataFailed('error');
     return Stack(
       children: [
         Container(color: Colors.black),
@@ -47,8 +49,110 @@ class MainView extends ConsumerWidget {
                     flex: 2,
                     child: LogoTabbar(connection: connection),
                   ),
-                  const Spacer(
-                    flex: 3,
+                  if (versions is DataSuccess)
+                    Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(5),
+                          child: Material(
+                            borderRadius: BorderRadius.circular(20),
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(20),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8),
+                                child: Text(versions.data!.firmware),
+                              ),
+                              onTap: () {
+                                Clipboard.setData(ClipboardData(text: versions.data!.firmware));
+                              },
+                            ),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(5),
+                          child: Material(
+                            borderRadius: BorderRadius.circular(20),
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(20),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8),
+                                child: Text('${versions.data!.serial}'),
+                              ),
+                              onTap: () {
+                                Clipboard.setData(ClipboardData(text: '${versions.data!.serial}'));
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  Consumer(
+                    builder: (context, loalRef, child) {
+                      final skyleVersion = loalRef.watch(AppState().skyleVersionProvider);
+                      return Column(
+                        children: <Widget>[
+                          ListTile(
+                            title: const Text('Skyle 2'),
+                            leading: Radio<SkyleVersion>(
+                              value: SkyleVersion.skyle2,
+                              groupValue: skyleVersion,
+                              onChanged: (SkyleVersion? value) async {
+                                ref.read(AppState().skyleVersionProvider.notifier).state = value!;
+                                await AppState().et.disconnect();
+                                await AppState().et.connect(grpcPort: value.version);
+                              },
+                            ),
+                          ),
+                          ListTile(
+                            title: const Text('Sykle 3'),
+                            leading: Radio<SkyleVersion>(
+                              value: SkyleVersion.skyle3,
+                              groupValue: skyleVersion,
+                              onChanged: (SkyleVersion? value) async {
+                                ref.read(AppState().skyleVersionProvider.notifier).state = value!;
+                                await AppState().et.disconnect();
+                                await AppState().et.connect(grpcPort: value.version);
+                              },
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                  const Divider(),
+                  Consumer(
+                    builder: (context, loalRef, child) {
+                      final skyleType = loalRef.watch(AppState().skyleTypeProvider);
+
+                      return Column(
+                        children: <Widget>[
+                          ListTile(
+                            title: const Text('SIK'),
+                            leading: Radio<SkyleType>(
+                              value: SkyleType.skyleIntegrationKit,
+                              groupValue: skyleType,
+                              onChanged: (SkyleType? value) async {
+                                ref.read(AppState().skyleTypeProvider.notifier).state = value!;
+                                await AppState().et.disconnect();
+                                await AppState().et.connect(grpcPort: value.port);
+                              },
+                            ),
+                          ),
+                          ListTile(
+                            title: const Text('SFI'),
+                            leading: Radio<SkyleType>(
+                              value: SkyleType.skyleForIpad,
+                              groupValue: skyleType,
+                              onChanged: (SkyleType? value) async {
+                                ref.read(AppState().skyleTypeProvider.notifier).state = value!;
+                                await AppState().et.disconnect();
+                                await AppState().et.connect(grpcPort: value.port);
+                              },
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                   badges.Badge(
                     position: badges.BadgePosition.topEnd(top: 20, end: 10),
@@ -118,21 +222,9 @@ class _CalibrationPointsSelection extends ConsumerWidget {
                 child: Padding(
                   padding: Responsive.padding(context, const EdgeInsets.fromLTRB(20, 25, 20, 25)),
                   child: GazeButton(
+                    color: backgroundColor,
                     properties: GazeButtonProperties(
-                      backgroundColor: backgroundColor,
                       gazeInteractive: points != item,
-                      child: Container(
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: borderColor,
-                              width: 3,
-                            )),
-                        child: CalibrationPointsView(
-                          points: item.array,
-                          color: Colors.yellow,
-                        ),
-                      ),
                       route: MainRoutes.home.path,
                     ),
                     onTap: points == item
@@ -140,6 +232,18 @@ class _CalibrationPointsSelection extends ConsumerWidget {
                         : () async {
                             await ref.read(AppState().calibrationPointsProvider.notifier).update(item);
                           },
+                    child: Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: borderColor,
+                            width: 3,
+                          )),
+                      child: CalibrationPointsView(
+                        points: item.array,
+                        color: Colors.yellow,
+                      ),
+                    ),
                   ),
                 ),
               );
@@ -157,9 +261,9 @@ class _StartButton extends StatelessWidget {
       child: Padding(
         padding: Responsive.padding(context, const EdgeInsets.all(20)),
         child: GazeButton(
+          color: SkyleTheme.of(context).primaryColor,
           properties: GazeButtonProperties(
-            backgroundColor: SkyleTheme.of(context).primaryColor,
-            text: 'Calibrate',
+            text: const Text('Calibrate'),
             icon: Icon(
               Icons.remove_red_eye_sharp,
               color: Colors.white,
@@ -183,9 +287,9 @@ class _ExitButton extends ConsumerWidget {
       child: Padding(
         padding: Responsive.padding(context, const EdgeInsets.all(20)),
         child: GazeButton(
+          color: SkyleTheme.of(context).primaryColor,
           properties: GazeButtonProperties(
-            text: 'Exit',
-            backgroundColor: SkyleTheme.of(context).primaryColor,
+            text: const Text('Exit'),
             icon: Icon(
               Icons.highlight_off_rounded,
               color: Colors.white,

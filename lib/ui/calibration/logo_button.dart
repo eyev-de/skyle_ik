@@ -38,7 +38,7 @@ class LogoButton extends StatelessWidget {
                   children: [
                     Text(
                       'calibration',
-                      style: SkyleTheme.of(context).primaryTextTheme.bodyText1,
+                      style: SkyleTheme.of(context).primaryTextTheme.bodyLarge,
                     ),
                   ],
                 ),
@@ -48,9 +48,9 @@ class LogoButton extends StatelessWidget {
               width: 300,
               height: 100,
               child: GazeButton(
+                color: SkyleTheme.of(context).primaryColor,
                 properties: GazeButtonProperties(
-                  text: 'Done',
-                  backgroundColor: SkyleTheme.of(context).primaryColor,
+                  text: const Text('Done'),
                   gazeInteractive: visible,
                   route: route,
                 ),

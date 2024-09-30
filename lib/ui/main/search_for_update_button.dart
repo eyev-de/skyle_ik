@@ -32,12 +32,12 @@ class SearchForFirmwareUpdateButton extends ConsumerWidget {
       child: Padding(
         padding: Responsive.padding(context, const EdgeInsets.all(20)),
         child: update.isRefreshing
-            ? Column(
+            ? const Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
+                    children: [
                       CircularProgressIndicator(),
                     ],
                   ),
@@ -46,12 +46,12 @@ class SearchForFirmwareUpdateButton extends ConsumerWidget {
             : update.when(
                 data: (data) => _button(data, ref),
                 error: (error, st) => _button(DataFailed(error.toString()), ref),
-                loading: () => Column(
+                loading: () => const Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
+                      children: [
                         CircularProgressIndicator(),
                       ],
                     ),
@@ -66,8 +66,10 @@ class SearchForFirmwareUpdateButton extends ConsumerWidget {
     return Builder(
       builder: (context) => GazeButton(
         properties: GazeButtonProperties(
-          text: data is DataSuccess && data.data!.newupdate ? 'Update firmware' : 'Search for firmware update',
-          textStyle: const TextStyle(color: Colors.white, fontSize: 11),
+          text: Text(
+            data is DataSuccess && data.data!.newupdate ? 'Update firmware' : 'Search for firmware update',
+            style: const TextStyle(color: Colors.white, fontSize: 11),
+          ),
           icon: Icon(
             Icons.upgrade,
             color: Colors.white,
@@ -152,6 +154,16 @@ class SearchForFirmwareUpdateButton extends ConsumerWidget {
       }
     });
 
+    late final newVersionProvider = FutureProvider.autoDispose<DataState<UpdateResponse>>((ref) async {
+      final connection = await ref.watch(AppState().connectionProvider.future);
+      if (connection == Connection.connecting) return const DataFailed('Not connected');
+      final repository = ref.read(AppState().updateRepositoryProvider);
+      final versions = await ref.watch(AppState().versionsProvider.future);
+      final beta = ref.read(AppState().betaFirmwareProvider);
+      if (versions is DataFailed) return DataFailed('${versions.error}');
+      return repository.tryCheckForUpdate(versions.data!.firmware, versions.data!.serial, beta: beta);
+    });
+
     Routes.dialog();
     return showDialog<void>(
       context: context,
@@ -161,6 +173,8 @@ class SearchForFirmwareUpdateButton extends ConsumerWidget {
         return Consumer(
           builder: (context, ref, child) {
             // final isBeta = ref.watch(AppState().isBetaProvider).valueOrNull ?? const DataSuccess(false);
+            final versions = ref.watch(AppState().versionsProvider).valueOrNull ?? const DataFailed('error');
+            final newVersion = ref.watch(newVersionProvider).valueOrNull ?? const DataFailed('error');
 
             final updatingState = ref.watch(updatingProvider).valueOrNull ?? const DataSuccess(UpdateState.none);
 
@@ -182,7 +196,7 @@ class SearchForFirmwareUpdateButton extends ConsumerWidget {
                   Radius.circular(20),
                 ),
               ),
-              title: const Text('Update firmware'),
+              title: Text('Update firmware from ${versions.data?.firmware} to ${newVersion.data?.version}'),
               content: SizedBox(
                 width: 500,
                 height: 220,
@@ -215,12 +229,12 @@ class SearchForFirmwareUpdateButton extends ConsumerWidget {
                         ],
                       ),
                     if (updating || uploading || uploaded)
-                      Column(
+                      const Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
+                            children: [
                               CircularProgressIndicator(),
                             ],
                           ),
@@ -249,8 +263,12 @@ class SearchForFirmwareUpdateButton extends ConsumerWidget {
                           Expanded(
                             child: GazeButton(
                               properties: GazeButtonProperties(
-                                text: 'Cancel',
-                                textColor: uploading || uploaded || updating || finished ? Colors.grey : Colors.red,
+                                text: Text(
+                                  'Cancel',
+                                  style: TextStyle(
+                                    color: uploading || uploaded || updating || finished ? Colors.grey : Colors.red,
+                                  ),
+                                ),
                                 route: GazeInteractive().currentRoute,
                                 gazeInteractive: !(uploading || uploaded || updating || finished),
                               ),
@@ -265,8 +283,12 @@ class SearchForFirmwareUpdateButton extends ConsumerWidget {
                           Expanded(
                             child: GazeButton(
                               properties: GazeButtonProperties(
-                                text: finished || failed ? 'Dismiss' : 'Install',
-                                textColor: downloaded || finished ? Colors.blue : Colors.grey,
+                                text: Text(
+                                  finished || failed ? 'Dismiss' : 'Install',
+                                  style: TextStyle(
+                                    color: downloaded || finished ? Colors.blue : Colors.grey,
+                                  ),
+                                ),
                                 gazeInteractive: false,
                                 route: GazeInteractive().currentRoute,
                               ),
@@ -319,7 +341,7 @@ class SearchForFirmwareUpdateButton extends ConsumerWidget {
 class _DownloadUploadUpdate extends ConsumerWidget {
   final AutoDisposeStreamProvider<DataState<UpdateState>> updatingProvider;
 
-  const _DownloadUploadUpdate({Key? key, required this.updatingProvider}) : super(key: key);
+  const _DownloadUploadUpdate({super.key, required this.updatingProvider});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final updateState = ref.watch(updatingProvider).valueOrNull ?? const DataSuccess(UpdateState.none);

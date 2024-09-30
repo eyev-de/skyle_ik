@@ -26,28 +26,28 @@ class AppTheme {
         onSecondary: Colors.white,
         onSurface: Colors.white,
       ),
-      toggleableActiveColor: Colors.teal.shade800,
+      // toggleableActiveColor: Colors.teal.shade800,
       primaryColor: Colors.teal.shade800,
       primaryTextTheme: TextTheme(
-        headline1: const TextStyle(
+        headlineLarge: const TextStyle(
           color: Colors.white,
           fontSize: 25,
           fontWeight: FontWeight.bold,
           decoration: TextDecoration.none,
         ),
-        headline2: const TextStyle(
+        headlineMedium: const TextStyle(
           color: Colors.white,
           fontSize: 14,
           fontWeight: FontWeight.bold,
           decoration: TextDecoration.none,
         ),
-        bodyText1: const TextStyle(
+        bodyLarge: const TextStyle(
           color: Colors.white,
           fontSize: 14,
           fontWeight: FontWeight.normal,
           decoration: TextDecoration.none,
         ),
-        bodyText2: TextStyle(
+        bodyMedium: TextStyle(
           color: Colors.white.withOpacity(0.6),
           fontSize: 14,
           fontWeight: FontWeight.normal,
@@ -61,7 +61,7 @@ class AppTheme {
   static ThemeData of(BuildContext context) {
     return data().copyWith(
       primaryTextTheme: TextTheme(
-        headline1: TextStyle(
+        headlineLarge: TextStyle(
           color: Colors.white,
           fontSize: Responsive.getResponsiveValue(
             forLargeScreen: 40,
@@ -71,7 +71,7 @@ class AppTheme {
           fontWeight: FontWeight.bold,
           decoration: TextDecoration.none,
         ),
-        headline2: TextStyle(
+        headlineMedium: TextStyle(
           color: Colors.white,
           fontSize: Responsive.getResponsiveValue(
             forLargeScreen: 30,
@@ -81,7 +81,7 @@ class AppTheme {
           fontWeight: FontWeight.bold,
           decoration: TextDecoration.none,
         ),
-        headline3: TextStyle(
+        headlineSmall: TextStyle(
           color: Colors.white,
           fontSize: Responsive.getResponsiveValue(
             forLargeScreen: 20,
@@ -91,7 +91,7 @@ class AppTheme {
           fontWeight: FontWeight.bold,
           decoration: TextDecoration.none,
         ),
-        bodyText1: TextStyle(
+        bodyLarge: TextStyle(
           color: Colors.white,
           fontSize: Responsive.getResponsiveValue(
             forLargeScreen: 20,
@@ -101,7 +101,7 @@ class AppTheme {
           fontWeight: FontWeight.normal,
           decoration: TextDecoration.none,
         ),
-        bodyText2: TextStyle(
+        bodyMedium: TextStyle(
           color: Colors.white.withOpacity(0.6),
           fontSize: Responsive.getResponsiveValue(
             forLargeScreen: 20,

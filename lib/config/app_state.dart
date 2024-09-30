@@ -23,6 +23,23 @@ import '../domain/repositories/update_repository.dart';
 import 'local_settings_notifiers.dart';
 import 'positioning_type_notifier.dart';
 
+enum SkyleType {
+  skyleIntegrationKit(50051),
+  skyleForIpad(50052);
+
+  final int port;
+  const SkyleType(this.port);
+}
+
+enum SkyleVersion {
+  skyle1(1),
+  skyle2(2),
+  skyle3(3);
+
+  final int version;
+  const SkyleVersion(this.version);
+}
+
 class AppState {
   // Navigator 2.0 stuff
   final parserProvider = Provider<MainRouteInformationParser>((ref) => MainRouteInformationParser());
@@ -31,6 +48,10 @@ class AppState {
   late final routerDelegateProvider = Provider<MainRouterDelegate>((ref) => MainRouterDelegate(ref: ref));
 
   final navigatorProvider = StateNotifierProvider<MainNavigatorStateNotifier, List<RouteState>>((ref) => MainNavigatorStateNotifier());
+
+  // Skyle Type stuff
+  final skyleTypeProvider = StateProvider((ref) => SkyleType.skyleIntegrationKit);
+  final skyleVersionProvider = StateProvider((ref) => SkyleVersion.skyle3);
 
   // Skyle API oject
   final skyle.ET et = skyle.ET();
@@ -62,6 +83,10 @@ class AppState {
 
   late final positioningTypeProvider = StateNotifierProvider<PositioningTypeNotifier, PositioningType>((ref) {
     return PositioningTypeNotifier();
+  });
+
+  late final videoStreamProvider = StreamProvider((ref) {
+    return videoStreamController.stream;
   });
 
   late final switchSettingsProvider = StreamProvider.autoDispose((ref) {
@@ -157,14 +182,20 @@ class AppState {
   StreamController<skyle.DataState<skyle.PositioningMessage>> positioningStreamController = StreamController();
   StreamSubscription<skyle.DataState<skyle.PositioningMessage>>? positioningStreamSubscription;
 
+  Stream<skyle.DataState<skyle.RawImage>>? videoStream;
+  StreamController<skyle.DataState<skyle.RawImage>> videoStreamController = StreamController();
+  StreamSubscription<skyle.DataState<skyle.RawImage>>? videoStreamSubscription;
+
   Future<void> init() async {
     connectionStreamSubscription = et.connectionStream.listen((connection) {
       if (connection == skyle.Connection.connected) {
         _startGazeStream();
         _startPositioningStream();
+        _startVideoStream();
       } else {
         _stopGazeStream();
         _stopPositioningStream();
+        _stopVideoStream();
       }
     });
   }
@@ -181,6 +212,11 @@ class AppState {
   Future<void> _stopPositioningStream() async {
     await positioningStreamSubscription?.cancel();
     await et.positioning.stop();
+  }
+
+  Future<void> _stopVideoStream() async {
+    await videoStreamSubscription?.cancel();
+    await et.video.stop();
   }
 
   Future<void> _startGazeStream() async {
@@ -208,6 +244,20 @@ class AppState {
         await _startPositioningStream();
       } else if (positioning is skyle.DataSuccess) {
         positioningStreamController.add(positioning);
+      }
+    });
+  }
+
+  Future<void> _startVideoStream() async {
+    if (et.connection != skyle.Connection.connected) return;
+    videoStream = et.video.start();
+    videoStreamSubscription = videoStream?.listen((video) async {
+      if (video is skyle.DataFailed) {
+        await _stopVideoStream();
+        await Future.delayed(const Duration(milliseconds: 500));
+        await _startVideoStream();
+      } else if (video is skyle.DataSuccess) {
+        videoStreamController.add(video);
       }
     });
   }

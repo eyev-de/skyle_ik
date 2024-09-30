@@ -69,7 +69,17 @@ class _CalibrationViewState extends ConsumerState<CalibrationView> with SingleTi
 
           return AppState().et.calibration.calibrate(
                 calibrationPoints,
-                screenSizes: skyle.ScreenSizes(resolution: skyle.Size(width: mediaQuery.size.width, height: mediaQuery.size.height)),
+                screenSizes: skyle.ScreenSizes(
+                  resolution: skyle.Size(
+                    width: mediaQuery.size.width,
+                    height: mediaQuery.size.height,
+                  ),
+                  dimensions: const skyle.Size(
+                    width: 1920,
+                    height: 1080,
+                  ),
+                ),
+                stepped: true,
               );
         });
         setState(() {
@@ -134,6 +144,10 @@ class _CalibrationViewState extends ConsumerState<CalibrationView> with SingleTi
       pointerPosition = message.data!.point!.coordinates;
       pointervisible = true;
       print(message.data!.point!.coordinates);
+      SchedulerBinding.instance.addPostFrameCallback((_) async {
+        await Future.delayed(const Duration(milliseconds: 400));
+        AppState().et.calibration.next();
+      });
     }
 
     return Scaffold(

@@ -26,16 +26,16 @@ class BetaSwitch extends ConsumerWidget {
     // final isBeta = ref.watch(AppState().isBetaProvider).valueOrNull ?? const skyle.DataSuccess(false);
     // if (isBeta is skyle.DataSuccess && isBeta.data!) {
     return GazeSwitchButton(
+      route: '${MainRoutes.home.path}/dialog',
+      value: ref.read(AppState().betaFirmwareProvider),
       properties: GazeSwitchButtonProperties(
-        state: GazeSwitchButtonState(toggled: ref.read(AppState().betaFirmwareProvider)),
-        toggledColor: AppTheme.of(context).primaryColor,
-        unToggledColor: Colors.grey.shade700,
+        activeColor: AppTheme.of(context).primaryColor,
+        inactiveColor: Colors.grey.shade700,
         innerPadding: const EdgeInsets.all(10),
         margin: const EdgeInsets.fromLTRB(10, 20, 10, 20),
         size: const Size(50, 50),
-        route: '${MainRoutes.home.path}/dialog',
       ),
-      onToggled: (toggled) async {
+      onChanged: (toggled) async {
         try {
           await ref.read(AppState().betaFirmwareProvider.notifier).update(toggled);
           // print(toggled);
@@ -46,10 +46,8 @@ class BetaSwitch extends ConsumerWidget {
             ..invalidate(downloadUpdateProvider)
             ..invalidate(AppState().releaseNotesProvider(toggled));
           // await update.doYourThing(et.version);
-          return true;
         } catch (error) {
           // skyleLogger?.e('Error switching to ${toggled ? 'beta' : 'stable'} channel.', error, StackTrace.current);
-          return false;
         }
       },
 

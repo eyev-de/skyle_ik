@@ -30,5 +30,5 @@ Future<void> main() async {
     setWindowMinSize(const Size(1024, 768));
   }
 
-  runApp(const ProviderScope(child: SkyleApp()));
+  runApp(GazeContext(sharedPreferences: AppState().sharedPreferences, child: const SkyleApp()));
 }

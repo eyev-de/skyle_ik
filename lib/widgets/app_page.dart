@@ -42,9 +42,13 @@ class AppPage extends StatelessWidget {
                 child: GazeButton(
                   properties: GazeButtonProperties(
                     innerPadding: Responsive.padding(context, const EdgeInsets.fromLTRB(20, 20, 100, 20)),
-                    text: 'back',
-                    textColor: Colors.blue,
-                    horizontal: true,
+                    text: const Text(
+                      'back',
+                      style: TextStyle(
+                        color: Colors.blue,
+                      ),
+                    ),
+                    direction: Axis.horizontal,
                     icon: Icon(
                       Icons.chevron_left,
                       color: Colors.blue,
@@ -59,21 +63,21 @@ class AppPage extends StatelessWidget {
               if (title != null)
                 Text(
                   title!,
-                  style: SkyleTheme.of(context).primaryTextTheme.headline1,
+                  style: SkyleTheme.of(context).primaryTextTheme.headlineLarge,
                 ),
               Opacity(
                 opacity: helpPage != null ? 1.0 : 0.0,
                 child: Padding(
                   padding: Responsive.padding(context, const EdgeInsets.fromLTRB(0, 20, 200, 0)),
                   child: GazeButton(
+                    color: SkyleTheme.of(context).primaryColor,
                     properties: GazeButtonProperties(
                       icon: Icon(
                         Icons.help,
                         color: Colors.white,
                         size: Responsive.getResponsiveValue(forLargeScreen: 35, forMediumScreen: 20, context: context),
                       ),
-                      backgroundColor: SkyleTheme.of(context).primaryColor,
-                      horizontal: true,
+                      direction: Axis.horizontal,
                       borderRadius: BorderRadius.circular(100),
                       route: route,
                     ),

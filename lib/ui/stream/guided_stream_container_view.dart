@@ -17,10 +17,10 @@ class GuidedStreamContainerView extends ConsumerWidget {
   final double maxWidth;
   final double maxHeight;
   const GuidedStreamContainerView({
-    Key? key,
+    super.key,
     required this.maxWidth,
     required this.maxHeight,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -29,12 +29,12 @@ class GuidedStreamContainerView extends ConsumerWidget {
     return position.when(
       data: (value) {
         if (value is DataFailed) {
-          return Column(
+          return const Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
+                children: [
                   CircularProgressIndicator(),
                 ],
               ),
@@ -67,12 +67,12 @@ class GuidedStreamContainerView extends ConsumerWidget {
           ],
         );
       },
-      loading: () => Column(
+      loading: () => const Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
+            children: [
               CircularProgressIndicator(),
             ],
           ),
@@ -81,7 +81,7 @@ class GuidedStreamContainerView extends ConsumerWidget {
       error: (e, _) => Center(
         child: Text(
           e.toString(),
-          style: Theme.of(context).textTheme.headline6!.copyWith(color: Colors.red),
+          style: Theme.of(context).textTheme.headlineSmall!.copyWith(color: Colors.red),
         ),
       ),
     );

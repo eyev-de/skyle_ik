@@ -32,6 +32,6 @@ jobs:
       uses: ncipollo/release-action@v1
       with:
         artifacts: 'build/windows/x64/runner/Release/skyle_ik-windows.zip'
-        tag: '2.0.0'
+        tag: '2.1.0'
         commit: main
         allowUpdates: true

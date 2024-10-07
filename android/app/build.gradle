@@ -23,6 +23,7 @@ if (flutterVersionName == null) {
 }
 
 android {
+    namespace "com.example.skyle_ik"
     compileSdkVersion flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 

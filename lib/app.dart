@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gaze_interactive/api.dart';
+import 'package:millimeters/millimeters.dart';
 import 'package:skyle_api/api.dart' as skyle;
 import 'package:skyle_ik/config/positioning_type_notifier.dart';
 import 'package:universal_platform/universal_platform.dart';
@@ -25,7 +26,7 @@ import 'ui/main/theme.dart';
 import 'util/windows_monitor.dart';
 
 class SkyleApp extends ConsumerStatefulWidget {
-  const SkyleApp({Key? key}) : super(key: key);
+  const SkyleApp({super.key});
 
   @override
   ConsumerState<SkyleApp> createState() => _SkyleAppState();
@@ -148,7 +149,9 @@ class _SkyleAppState extends ConsumerState<SkyleApp> with WidgetsBindingObserver
                 skyle.IPadModel model;
                 final deviceInfo = DeviceInfoPlugin();
                 final iosInfo = await deviceInfo.iosInfo;
-                final deviceModel = iosInfo.utsname.machine!;
+                final deviceModel = iosInfo.utsname.machine;
+                final size = Millimeters.of(context).physical;
+
                 model = skyle.IPadModel.values.firstWhere((element) => element.name == deviceModel.replaceAll(',', '_'), orElse: () {
                   print('iPad $deviceModel is not compatible with Skyle');
                   return skyle.IPadModel.iPad13_11;
@@ -158,6 +161,10 @@ class _SkyleAppState extends ConsumerState<SkyleApp> with WidgetsBindingObserver
                         resolution: skyle.Size(
                           width: width,
                           height: height,
+                        ),
+                        dimensions: skyle.Size(
+                          width: size.width,
+                          height: size.height,
                         ),
                       ),
                     );
@@ -178,7 +185,7 @@ class _SkyleAppState extends ConsumerState<SkyleApp> with WidgetsBindingObserver
                     changed = true;
                     print('Reset because of iPadModel = $model');
                   }
-                  final isOld = iosInfo.systemVersion!.compareTo('13.4') < 0;
+                  final isOld = iosInfo.systemVersion.compareTo('13.4') < 0;
                   if (iPadOS.isOld != isOld) {
                     iPadOS = iPadOS.copyWith(isOld: isOld);
                     changed = true;

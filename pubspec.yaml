@@ -3,7 +3,7 @@ description: A simple example application to calibrate the Skyle eye-tracker.
 
 publish_to: 'none'
 
-version: 2.0.0
+version: 2.1.0
 
 environment:
   sdk: '>=2.18.0 <3.0.0'
@@ -33,10 +33,11 @@ dependencies:
 
   logger: ^2.4.0
 
+  millimeters: ^0.3.0
   minimize_app:
     git:
       url: https://github.com/krjw-eyev/minimize_app_plugin.git
-  
+      
   shared_preferences: ^2.0.3
 
   path: ^1.8.2
@@ -50,10 +51,7 @@ dependencies:
 
   win32: ^5.5.4
 
-  window_size:
-    git:
-      url: https://github.com/google/flutter-desktop-embedding.git
-      path: plugins/window_size
+  window_manager: ^0.4.2
 
 dependency_overrides:
   # gaze_interactive:

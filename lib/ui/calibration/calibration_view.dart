@@ -10,7 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gaze_interactive/api.dart';
+import 'package:millimeters/millimeters.dart';
 import 'package:skyle_api/api.dart' as skyle;
+import 'package:window_manager/window_manager.dart';
 
 import '../../config/routes/main_routes.dart';
 import '../../config/routes/routes.dart';
@@ -20,7 +22,7 @@ import '../calibration/pointer_view.dart';
 import '../calibration/reference_points_view.dart';
 
 class CalibrationView extends ConsumerStatefulWidget {
-  const CalibrationView({Key? key}) : super(key: key);
+  const CalibrationView({super.key});
 
   @override
   ConsumerState<CalibrationView> createState() => _CalibrationViewState();
@@ -59,6 +61,7 @@ class _CalibrationViewState extends ConsumerState<CalibrationView> with SingleTi
 
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       await Future.delayed(const Duration(milliseconds: 1000));
+
       if (mounted) {
         calibrationProvider = StreamProvider.autoDispose((ref) {
           ref.onDispose(() {
@@ -66,7 +69,9 @@ class _CalibrationViewState extends ConsumerState<CalibrationView> with SingleTi
           });
           final MediaQueryData mediaQuery = MediaQuery.of(context);
           final calibrationPoints = ref.read(AppState().calibrationPointsProvider);
-
+          print("Starting calibration");
+          final size = Millimeters.of(context).physical;
+          print(size);
           return AppState().et.calibration.calibrate(
                 calibrationPoints,
                 screenSizes: skyle.ScreenSizes(
@@ -74,9 +79,9 @@ class _CalibrationViewState extends ConsumerState<CalibrationView> with SingleTi
                     width: mediaQuery.size.width,
                     height: mediaQuery.size.height,
                   ),
-                  dimensions: const skyle.Size(
-                    width: 1920,
-                    height: 1080,
+                  dimensions: skyle.Size(
+                    width: size.width,
+                    height: size.height,
                   ),
                 ),
                 stepped: true,
@@ -92,6 +97,7 @@ class _CalibrationViewState extends ConsumerState<CalibrationView> with SingleTi
 
   Future<void> _listener(skyle.Connection connection) async {
     if (connection == skyle.Connection.disconnected) {
+      Future.delayed(const Duration(milliseconds: 300), () async => windowManager.setFullScreen(false));
       Routes.backAll();
     }
   }
@@ -180,6 +186,7 @@ class _CalibrationViewState extends ConsumerState<CalibrationView> with SingleTi
                   await AppState().et.settings.disableMouse();
                 }
               });
+              Future.delayed(const Duration(milliseconds: 300), () async => windowManager.setFullScreen(false));
               Routes.backAll();
             },
             route: MainRoutes.capture.path,

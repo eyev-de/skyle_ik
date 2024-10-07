@@ -14,6 +14,7 @@ import 'package:gaze_interactive/api.dart';
 import 'package:minimize_app/minimize_app.dart';
 import 'package:skyle_api/api.dart';
 import 'package:universal_platform/universal_platform.dart';
+import 'package:window_manager/window_manager.dart';
 
 import '../../config/routes/main_routes.dart';
 import '../../config/routes/routes.dart';
@@ -271,7 +272,9 @@ class _StartButton extends StatelessWidget {
             ),
             route: MainRoutes.home.path,
           ),
-          onTap: () {
+          onTap: () async {
+            windowManager.setFullScreen(true);
+            await Future.delayed(const Duration(milliseconds: 500));
             Routes.route(MainRoutes.capture.path);
           },
         ),

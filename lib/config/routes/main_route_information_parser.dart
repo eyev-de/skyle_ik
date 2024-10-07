@@ -10,13 +10,13 @@ import 'route_state.dart';
 class MainRouteInformationParser extends RouteInformationParser<RouteState> {
   @override
   Future<RouteState> parseRouteInformation(RouteInformation routeInformation) async {
-    final uri = Uri.parse(routeInformation.location!);
+    final uri = Uri.parse(routeInformation.uri.path);
     String? id;
     return RouteState(route: uri.path, id: id);
   }
 
   @override
   RouteInformation restoreRouteInformation(RouteState configuration) {
-    return RouteInformation(location: configuration.route);
+    return RouteInformation(uri: Uri.parse(configuration.route));
   }
 }

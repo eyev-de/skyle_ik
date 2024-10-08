@@ -9,6 +9,7 @@ import 'package:gaze_interactive/api.dart';
 import 'package:millimeters/millimeters.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skyle_api/api.dart' as skyle;
+import 'package:universal_platform/universal_platform.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'app.dart';
@@ -23,15 +24,18 @@ Future<void> main() async {
   AppState().sharedPreferences = await SharedPreferences.getInstance();
   skyle.ET.logger = Logger();
 
-  await windowManager.ensureInitialized();
-  const windowOptions = WindowOptions(center: true, minimumSize: Size(1440, 900), titleBarStyle: TitleBarStyle.hidden);
-  await windowManager.waitUntilReadyToShow(windowOptions, () async {
-    await windowManager.show();
-    await windowManager.focus();
-    await windowManager.setSize(const Size(1440, 900));
-  });
+  if (UniversalPlatform.isDesktop) {
+    await windowManager.ensureInitialized();
+    const windowOptions = WindowOptions(center: true,
+        minimumSize: Size(1440, 900),
+        titleBarStyle: TitleBarStyle.hidden);
+    await windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.show();
+      await windowManager.focus();
+      await windowManager.setSize(const Size(1440, 900));
+    });
 
-  print(windowManager.getDevicePixelRatio());
+  }
 
   runApp(
     Millimeters.fromView(

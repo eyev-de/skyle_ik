@@ -58,6 +58,8 @@ dependency_overrides:
   #   path: ../flutter_gaze_interactive
   # skyle_api:
   #   path: ../dart_skyle_api
+  # minimize_app:
+  #   path: ../minimize_app_plugin
 
 dev_dependencies:
   flutter_test:

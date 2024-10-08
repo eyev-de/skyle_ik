@@ -524,9 +524,11 @@ packages:
   minimize_app:
     dependency: "direct main"
     description:
-      path: "../minimize_app_plugin"
-      relative: true
-    source: path
+      path: "."
+      ref: HEAD
+      resolved-ref: "55e2e9e979d455b2899fd52711f487907ae87cd1"
+      url: "https://github.com/krjw-eyev/minimize_app_plugin.git"
+    source: git
     version: "1.0.0"
   package_config:
     dependency: transitive

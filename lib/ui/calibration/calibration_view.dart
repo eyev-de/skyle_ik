@@ -12,6 +12,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gaze_interactive/api.dart';
 import 'package:millimeters/millimeters.dart';
 import 'package:skyle_api/api.dart' as skyle;
+import 'package:universal_platform/universal_platform.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../../config/routes/main_routes.dart';
@@ -97,7 +98,9 @@ class _CalibrationViewState extends ConsumerState<CalibrationView> with SingleTi
 
   Future<void> _listener(skyle.Connection connection) async {
     if (connection == skyle.Connection.disconnected) {
-      Future.delayed(const Duration(milliseconds: 300), () async => windowManager.setFullScreen(false));
+      if (UniversalPlatform.isDesktop) {
+        Future.delayed(const Duration(milliseconds: 300), () async => windowManager.setFullScreen(false));
+      }
       Routes.backAll();
     }
   }
@@ -186,7 +189,9 @@ class _CalibrationViewState extends ConsumerState<CalibrationView> with SingleTi
                   await AppState().et.settings.disableMouse();
                 }
               });
-              Future.delayed(const Duration(milliseconds: 300), () async => windowManager.setFullScreen(false));
+              if (UniversalPlatform.isDesktop) {
+                Future.delayed(const Duration(milliseconds: 300), () async => windowManager.setFullScreen(false));
+              }
               Routes.backAll();
             },
             route: MainRoutes.capture.path,

@@ -185,8 +185,8 @@ class _SkyleAppState extends ConsumerState<SkyleApp> with WidgetsBindingObserver
                     changed = true;
                     print('Reset because of isNotZoomed ${!zoomed}');
                   }
-                  if (iPadOS.iPadModel != null && iPadOS.iPadModel != model) {
-                    iPadOS = iPadOS.copyWith(iPadModel: model);
+                  if (iPadOS.iPadModel != null && iPadOS.iPadModel != model.substitute) {
+                    iPadOS = iPadOS.copyWith(iPadModel: model.substitute);
                     changed = true;
                     print('Reset because of iPadModel = $model');
                   }

@@ -55,34 +55,38 @@ class StreamView extends ConsumerWidget {
           Flexible(
             child: Container(
               padding: Responsive.padding(context, const EdgeInsets.fromLTRB(20, 0, 20, 20)),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  var maxWidth =
-                      constraints.maxHeight * AppState().et.resolution(skyleVersion.version).width / AppState().et.resolution(skyleVersion.version).height;
-                  if (maxWidth > constraints.maxWidth) maxWidth = constraints.maxWidth;
-                  var maxHeight =
-                      constraints.maxWidth * AppState().et.resolution(skyleVersion.version).height / AppState().et.resolution(skyleVersion.version).width;
-                  if (maxHeight > constraints.maxHeight) maxHeight = constraints.maxHeight;
-                  return ConstrainedBox(
-                    constraints: BoxConstraints(maxHeight: maxHeight, maxWidth: maxWidth),
-                    // child: Stack(
-                    //   children: [
-                    //     _mjpeg(context, maxWidth, maxWidth),
-                    //     GuidedStreamContainerView(
-                    //       et: et,
-                    //       maxWidth: maxWidth,
-                    //       maxHeight: maxHeight,
-                    //     )
-                    //   ],
-                    // ),
-                    child: positioningType == PositioningType.guided
-                        ? GuidedStreamContainerView(
-                            maxWidth: maxWidth,
-                            maxHeight: maxHeight,
-                          )
-                        : _mjpeg(context, maxWidth, maxWidth),
-                  );
-                },
+              child: skyleVersion.when(
+                data: (value) => value != null
+                    ? LayoutBuilder(
+                        builder: (context, constraints) {
+                          var maxWidth = constraints.maxHeight * AppState().et.resolution(value.version).width / AppState().et.resolution(value.version).height;
+                          if (maxWidth > constraints.maxWidth) maxWidth = constraints.maxWidth;
+                          var maxHeight = constraints.maxWidth * AppState().et.resolution(value.version).height / AppState().et.resolution(value.version).width;
+                          if (maxHeight > constraints.maxHeight) maxHeight = constraints.maxHeight;
+                          return ConstrainedBox(
+                            constraints: BoxConstraints(maxHeight: maxHeight, maxWidth: maxWidth),
+                            // child: Stack(
+                            //   children: [
+                            //     _mjpeg(context, maxWidth, maxWidth),
+                            //     GuidedStreamContainerView(
+                            //       et: et,
+                            //       maxWidth: maxWidth,
+                            //       maxHeight: maxHeight,
+                            //     )
+                            //   ],
+                            // ),
+                            child: positioningType == PositioningType.guided
+                                ? GuidedStreamContainerView(
+                                    maxWidth: maxWidth,
+                                    maxHeight: maxHeight,
+                                  )
+                                : _mjpeg(context, maxWidth, maxWidth, value),
+                          );
+                        },
+                      )
+                    : Container(),
+                error: (error, stackTrace) => Text(error.toString()),
+                loading: () => const Center(child: CircularProgressIndicator()),
               ),
             ),
           ),
@@ -90,31 +94,32 @@ class StreamView extends ConsumerWidget {
     );
   }
 
-  Widget _mjpeg(BuildContext context, double width, double height) {
+  Widget _mjpeg(BuildContext context, double width, double height, SkyleVersion skyleVersion) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
-      child: const RawImageView(),
-      // MjpegView(
-      //   width: width,
-      //   height: height,
-      //   fit: BoxFit.fill,
-      //   error: (context, error) {
-      //     return Column(
-      //       mainAxisAlignment: MainAxisAlignment.center,
-      //       children: [
-      //         Row(
-      //           mainAxisAlignment: MainAxisAlignment.center,
-      //           children: [
-      //             Icon(
-      //               Icons.videocam_off,
-      //               color: SkyleTheme.of(context).primaryColor,
-      //             ),
-      //           ],
-      //         ),
-      //       ],
-      //     );
-      //   },
-      // ),
+      child: skyleVersion == SkyleVersion.skyle3
+          ? const RawImageView()
+          : MjpegView(
+              width: width,
+              height: height,
+              fit: BoxFit.fill,
+              error: (context, error) {
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.videocam_off,
+                          color: SkyleTheme.of(context).primaryColor,
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+              },
+            ),
     );
   }
 

@@ -67,35 +67,47 @@ class GuidedStreamView extends ConsumerWidget {
             // ),
           ),
         ),
-        AnimatedPositioned(
-          key: const Key('LeftEye'),
-          left: leftEye.x / AppState().et.resolution(skyleVersion.version).width * maxWidth - size / 2,
-          top: leftEye.y / AppState().et.resolution(skyleVersion.version).height * maxHeight - size / 2,
-          duration: const Duration(milliseconds: 30),
-          child: AnimatedContainer(
-            width: size,
-            height: size,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(opacity), //SkyleTheme.of(context).primaryColor,
-              shape: BoxShape.circle,
-            ),
-            duration: const Duration(milliseconds: 100),
-          ),
+        skyleVersion.when(
+          data: (value) => value != null
+              ? AnimatedPositioned(
+                  key: const Key('LeftEye'),
+                  left: leftEye.x / AppState().et.resolution(value.version).width * maxWidth - size / 2,
+                  top: leftEye.y / AppState().et.resolution(value.version).height * maxHeight - size / 2,
+                  duration: const Duration(milliseconds: 30),
+                  child: AnimatedContainer(
+                    width: size,
+                    height: size,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(opacity), //SkyleTheme.of(context).primaryColor,
+                      shape: BoxShape.circle,
+                    ),
+                    duration: const Duration(milliseconds: 100),
+                  ),
+                )
+              : Container(),
+          loading: () => Container(),
+          error: (_, __) => Container(),
         ),
-        AnimatedPositioned(
-          key: const Key('RightEye'),
-          left: rightEye.x / AppState().et.resolution(skyleVersion.version).width * maxWidth - size / 2,
-          top: rightEye.y / AppState().et.resolution(skyleVersion.version).height * maxHeight - size / 2,
-          duration: const Duration(milliseconds: 30),
-          child: AnimatedContainer(
-            width: size,
-            height: size,
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(opacity), //SkyleTheme.of(context).primaryColor,
-              shape: BoxShape.circle,
-            ),
-            duration: const Duration(milliseconds: 150),
-          ),
+        skyleVersion.when(
+          data: (value) => value != null
+              ? AnimatedPositioned(
+                  key: const Key('RightEye'),
+                  left: rightEye.x / AppState().et.resolution(value!.version).width * maxWidth - size / 2,
+                  top: rightEye.y / AppState().et.resolution(value.version).height * maxHeight - size / 2,
+                  duration: const Duration(milliseconds: 30),
+                  child: AnimatedContainer(
+                    width: size,
+                    height: size,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(opacity), //SkyleTheme.of(context).primaryColor,
+                      shape: BoxShape.circle,
+                    ),
+                    duration: const Duration(milliseconds: 100),
+                  ),
+                )
+              : Container(),
+          loading: () => Container(),
+          error: (_, __) => Container(),
         ),
         Center(
           child: AnimatedOpacity(

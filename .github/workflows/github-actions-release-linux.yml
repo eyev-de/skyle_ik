@@ -37,6 +37,6 @@ jobs:
       uses: ncipollo/release-action@v1
       with:
         artifacts: 'build/linux/x64/release/bundle/skyle_ik-linux.zip'
-        tag: '2.1.0'
+        tag: '2.2.0'
         commit: main
         allowUpdates: true

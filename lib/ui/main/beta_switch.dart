@@ -11,7 +11,6 @@ import 'package:skyle_api/api.dart' as skyle;
 
 import '../../../config/theme/app_theme.dart';
 
-import '../../../util/responsive.dart';
 import '../../config/app_state.dart';
 import '../../config/routes/main_routes.dart';
 import '../../data/models/update/update_state.dart';
@@ -19,7 +18,7 @@ import '../../data/models/update/update_state.dart';
 class BetaSwitch extends ConsumerWidget {
   final AutoDisposeStreamProvider<skyle.DataState<UpdateState>> downloadUpdateProvider;
 
-  const BetaSwitch({Key? key, required this.downloadUpdateProvider}) : super(key: key);
+  const BetaSwitch({super.key, required this.downloadUpdateProvider});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

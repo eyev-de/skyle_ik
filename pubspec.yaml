@@ -3,12 +3,13 @@ description: A simple example application to calibrate the Skyle eye-tracker.
 
 publish_to: 'none'
 
-version: 2.1.0
+version: 2.2.0
 
 environment:
   sdk: '>=2.18.0 <3.0.0'
 
 dependencies:
+  async: ^2.11.0
 
   badges: ^3.0.2
   bitmap: ^0.2.0

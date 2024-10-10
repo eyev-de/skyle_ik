@@ -13,6 +13,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gaze_interactive/api.dart';
 import 'package:minimize_app/minimize_app.dart';
 import 'package:skyle_api/api.dart';
+import 'package:skyle_ik/ui/main/beta_switch.dart';
 import 'package:universal_platform/universal_platform.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -20,6 +21,7 @@ import '../../config/routes/main_routes.dart';
 import '../../config/routes/routes.dart';
 import '../../config/app_state.dart';
 
+import '../../data/models/update/update_state.dart';
 import '../../util/responsive.dart';
 import '../settings/gaze_speed_settings.dart';
 import 'logo.dart';
@@ -29,14 +31,10 @@ import '../stream/stream_view.dart';
 import '../calibration/calibration_points_view.dart';
 
 class MainView extends ConsumerWidget {
-  MainView({Key? key}) : super(key: key);
+  const MainView({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final connection = ref.watch(AppState().connectionProvider).valueOrNull ?? Connection.disconnected;
-    final beta = ref.watch(AppState().betaFirmwareProvider);
-    final update = ref.watch(AppState().checkForUpdateProvider(beta)).valueOrNull ?? const DataFailed('error');
-    final versions = ref.watch(AppState().versionsProvider).valueOrNull ?? const DataFailed('error');
     return Stack(
       children: [
         Container(color: Colors.black),
@@ -48,79 +46,57 @@ class MainView extends ConsumerWidget {
                 children: [
                   Flexible(
                     flex: 2,
-                    child: LogoTabbar(connection: connection),
-                  ),
-                  if (versions is DataSuccess)
-                    Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(5),
-                          child: Material(
-                            borderRadius: BorderRadius.circular(20),
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(20),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8),
-                                child: Text(versions.data!.firmware),
-                              ),
-                              onTap: () {
-                                Clipboard.setData(ClipboardData(text: versions.data!.firmware));
-                              },
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(5),
-                          child: Material(
-                            borderRadius: BorderRadius.circular(20),
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(20),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8),
-                                child: Text('${versions.data!.serial}'),
-                              ),
-                              onTap: () {
-                                Clipboard.setData(ClipboardData(text: '${versions.data!.serial}'));
-                              },
-                            ),
-                          ),
-                        ),
-                      ],
+                    child: Consumer(
+                      builder: (context, localRef, child) {
+                        final connection = localRef.watch(AppState().connectionProvider).valueOrNull ?? Connection.disconnected;
+                        return LogoTabbar(connection: connection);
+                      },
                     ),
+                  ),
                   Consumer(
-                    builder: (context, loalRef, child) {
-                      final skyleVersion = loalRef.watch(AppState().skyleVersionProvider);
-                      return Column(
-                        children: <Widget>[
-                          ListTile(
-                            title: const Text('Skyle 2'),
-                            leading: Radio<SkyleVersion>(
-                              value: SkyleVersion.skyle2,
-                              groupValue: skyleVersion,
-                              onChanged: (SkyleVersion? value) async {
-                                ref.read(AppState().skyleVersionProvider.notifier).state = value!;
-                                await AppState().et.disconnect();
-                                await AppState().et.connect(grpcPort: value.version);
-                              },
+                    builder: (context, localRef, child) {
+                      final versions = localRef.watch(AppState().versionsProvider).valueOrNull ?? const DataFailed('error');
+                      if (versions is DataSuccess) {
+                        return Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(5),
+                              child: Material(
+                                borderRadius: BorderRadius.circular(20),
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(20),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8),
+                                    child: Text(versions.data!.firmware),
+                                  ),
+                                  onTap: () {
+                                    Clipboard.setData(ClipboardData(text: versions.data!.firmware));
+                                  },
+                                ),
+                              ),
                             ),
-                          ),
-                          ListTile(
-                            title: const Text('Sykle 3'),
-                            leading: Radio<SkyleVersion>(
-                              value: SkyleVersion.skyle3,
-                              groupValue: skyleVersion,
-                              onChanged: (SkyleVersion? value) async {
-                                ref.read(AppState().skyleVersionProvider.notifier).state = value!;
-                                await AppState().et.disconnect();
-                                await AppState().et.connect(grpcPort: value.version);
-                              },
+                            Padding(
+                              padding: const EdgeInsets.all(5),
+                              child: Material(
+                                borderRadius: BorderRadius.circular(20),
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(20),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8),
+                                    child: Text('${versions.data!.serial}'),
+                                  ),
+                                  onTap: () {
+                                    Clipboard.setData(ClipboardData(text: '${versions.data!.serial}'));
+                                  },
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
-                      );
+                          ],
+                        );
+                      }
+                      return Container();
                     },
                   ),
-                  const Divider(),
                   Consumer(
                     builder: (context, loalRef, child) {
                       final skyleType = loalRef.watch(AppState().skyleTypeProvider);
@@ -155,16 +131,53 @@ class MainView extends ConsumerWidget {
                       );
                     },
                   ),
-                  badges.Badge(
-                    position: badges.BadgePosition.topEnd(top: 20, end: 10),
-                    badgeContent: const Padding(
-                      padding: EdgeInsets.all(5),
-                      child: Text('1'),
-                    ),
-                    showBadge: update is DataSuccess && update.data!.newupdate,
-                    child: Container(),
+                  Consumer(
+                    builder: (context, localRef, child) {
+                      final beta = localRef.watch(AppState().betaFirmwareProvider);
+                      final update = localRef.watch(AppState().checkForUpdateProvider(beta)).valueOrNull ?? const DataFailed('error');
+                      return badges.Badge(
+                        position: badges.BadgePosition.topEnd(top: 20, end: 10),
+                        badgeContent: const Padding(
+                          padding: EdgeInsets.all(5),
+                          child: Text('1'),
+                        ),
+                        showBadge: update is DataSuccess && update.data!.newupdate,
+                        child: Container(),
+                      );
+                    },
                   ),
                   const SearchForFirmwareUpdateButton(),
+                  Consumer(
+                    builder: (context, ref, child) {
+                      final isBeta = ref.watch(AppState().isBetaProvider).valueOrNull ?? const DataSuccess(false);
+                      final updatingState = ref.watch(AppState().updatingProvider).valueOrNull ?? const DataSuccess(UpdateState.none);
+
+                      final downloading = updatingState is DataSuccess && updatingState.data! == UpdateState.downloading ||
+                          (updatingState is DataLoading && ref.read(AppState().updatingStateProvider) == UpdateState.downloading);
+                      final downloaded = updatingState is DataSuccess && updatingState.data! == UpdateState.downloaded;
+                      final uploading = updatingState is DataSuccess && updatingState.data! == UpdateState.uploading ||
+                          (updatingState is DataLoading && ref.read(AppState().updatingStateProvider) == UpdateState.uploading);
+                      final uploaded = updatingState is DataSuccess && updatingState.data! == UpdateState.uploaded;
+                      final updating = updatingState is DataSuccess && updatingState.data! == UpdateState.updating;
+                      final finished = updatingState is DataSuccess && updatingState.data! == UpdateState.finished;
+                      final failed = updatingState is DataFailed;
+                      if (isBeta is DataSuccess && isBeta.data! && !updating && !uploaded && !uploading && !finished) {
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Padding(
+                              padding: EdgeInsets.only(left: 20),
+                              child: Text('Beta?'),
+                            ),
+                            const Spacer(),
+                            BetaSwitch(downloadUpdateProvider: AppState().downloadUpdateProvider),
+                          ],
+                        );
+                      }
+                      return Container();
+                    },
+                  ),
                   _ExitButton(),
                 ],
               ),

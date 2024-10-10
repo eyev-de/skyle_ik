@@ -4,6 +4,7 @@
 //  Copyright © 2022 eyeV GmbH. All rights reserved.
 //
 
+import 'package:async/async.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -18,6 +19,7 @@ import '../config/routes/main_router_delegate.dart';
 import '../config/routes/route_state.dart';
 import '../data/models/update/release_notes_response.dart';
 import '../data/models/update/update_response.dart';
+import '../data/models/update/update_state.dart';
 import '../data/repositories/update_repository_impl.dart';
 import '../domain/repositories/update_repository.dart';
 import 'local_settings_notifiers.dart';
@@ -51,7 +53,17 @@ class AppState {
 
   // Skyle Type stuff
   final skyleTypeProvider = StateProvider((ref) => SkyleType.skyleIntegrationKit);
-  final skyleVersionProvider = StateProvider((ref) => SkyleVersion.skyle3);
+  late final skyleVersionProvider = FutureProvider.autoDispose((ref) {
+    ref.keepAlive();
+    final versions = ref.watch(versionsProvider);
+    if (versions.value is skyle.DataSuccess && versions.value != null && versions.value!.data != null) {
+      if (versions.value!.data!.skyleType.toString().startsWith("3")) {
+        return SkyleVersion.skyle3;
+      } else {
+        return SkyleVersion.skyle2;
+      }
+    }
+  });
 
   // Skyle API oject
   final skyle.ET et = skyle.ET();
@@ -116,7 +128,10 @@ class AppState {
     if (connection == skyle.Connection.connected) {
       try {
         final versions = await ref.watch(AppState().versionsProvider.future);
-        if (versions is skyle.DataSuccess) ret = await repository.tryCheckForUpdate(versions.data!.firmware, versions.data!.serial, beta: beta);
+        final version = versions.data!.firmware;
+        final serial = versions.data!.serial;
+
+        if (versions is skyle.DataSuccess) ret = await repository.tryCheckForUpdate(version, serial, beta: beta);
       } catch (e) {
         ret = skyle.DataFailed<UpdateResponse>(e.toString());
       }
@@ -125,6 +140,79 @@ class AppState {
       await Future.delayed(Duration(milliseconds: minTimeInMilliseconds - stopwatch.elapsed.inMilliseconds));
     }
     return ret;
+  });
+
+  final uploadUpdateTriggerProvider = StateProvider((ref) {
+    return false;
+  });
+
+  final updatingStateProvider = StateProvider((ref) {
+    return UpdateState.none;
+  });
+
+  late final downloadUpdateProvider = StreamProvider.autoDispose((ref) async* {
+    ref.keepAlive();
+    final connection = await ref.read(AppState().connectionProvider.future);
+    final repository = ref.read(AppState().updateRepositoryProvider);
+    final beta = ref.read(AppState().betaFirmwareProvider);
+    if (connection == skyle.Connection.connected) {
+      try {
+        final versions = await ref.read(AppState().versionsProvider.future);
+        ref.read(updatingStateProvider.notifier).state = UpdateState.downloading;
+        if (versions is skyle.DataSuccess) yield* repository.tryDownloadUpdate(versions.data!.firmware, versions.data!.serial, beta: beta);
+      } catch (e) {
+        // skyleLogger?.i(e.toString());
+      }
+    }
+  });
+
+  late final uploadUpdateProvider = StreamProvider.autoDispose<skyle.DataState<UpdateState>>((ref) async* {
+    ref.keepAlive();
+    if (ref.watch(uploadUpdateTriggerProvider)) {
+      try {
+        ref.read(updatingStateProvider.notifier).state = UpdateState.uploading;
+        yield* ref.watch(AppState().updateRepositoryProvider).tryUpdate();
+      } catch (e) {
+        // skyleLogger?.i(e.toString());
+        yield skyle.DataFailed(e.toString());
+      }
+    }
+  });
+
+  late final combinedDownloadingAndUploadingUpdateProvider = StreamProvider.autoDispose<skyle.DataState<UpdateState>>((ref) async* {
+    final downloadStream = ref.watch(downloadUpdateProvider.stream);
+    final uploadStream = ref.watch(uploadUpdateProvider.stream);
+    yield* StreamGroup.merge([downloadStream, uploadStream]);
+  });
+
+  late final updatingProvider = StreamProvider.autoDispose<skyle.DataState<UpdateState>>((ref) async* {
+    final connection = await ref.watch(AppState().connectionProvider.future);
+    if (connection == skyle.Connection.connecting) return;
+    if (ref.read(updatingStateProvider) == UpdateState.uploaded && connection == skyle.Connection.disconnected) {
+      yield const skyle.DataSuccess(UpdateState.updating);
+      ref.read(updatingStateProvider.notifier).state = UpdateState.updating;
+      return;
+    }
+    if (ref.read(updatingStateProvider) == UpdateState.updating && connection == skyle.Connection.connected) {
+      yield const skyle.DataSuccess(UpdateState.finished);
+      ref.read(updatingStateProvider.notifier).state = UpdateState.none;
+      return;
+    }
+    final updatingStateStream = ref.watch(combinedDownloadingAndUploadingUpdateProvider.stream);
+    await for (final updatingState in updatingStateStream) {
+      if (updatingState is skyle.DataSuccess) ref.read(updatingStateProvider.notifier).state = updatingState.data!;
+      yield updatingState;
+    }
+  });
+
+  late final newVersionProvider = FutureProvider.autoDispose<skyle.DataState<UpdateResponse>>((ref) async {
+    final connection = await ref.watch(AppState().connectionProvider.future);
+    if (connection == skyle.Connection.connecting) return const skyle.DataFailed('Not connected');
+    final repository = ref.read(AppState().updateRepositoryProvider);
+    final versions = await ref.watch(AppState().versionsProvider.future);
+    final beta = ref.read(AppState().betaFirmwareProvider);
+    if (versions is skyle.DataFailed) return skyle.DataFailed('${versions.error}');
+    return repository.tryCheckForUpdate(versions.data!.firmware, versions.data!.serial, beta: beta);
   });
 
   final releaseNotesProvider = FutureProvider.autoDispose.family<skyle.DataState<ReleaseNotesResponse>?, bool>((ref, beta) async {

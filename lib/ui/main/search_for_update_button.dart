@@ -4,7 +4,6 @@
 //  Copyright © 2022 eyeV GmbH. All rights reserved.
 //
 
-import 'package:async/async.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -91,79 +90,6 @@ class SearchForFirmwareUpdateButton extends ConsumerWidget {
   }
 
   static Future<void> showUpdateInstallDialog(BuildContext context) {
-    final uploadUpdateTriggerProvider = StateProvider((ref) {
-      return false;
-    });
-
-    final updatingStateProvider = StateProvider((ref) {
-      return UpdateState.none;
-    });
-
-    final downloadUpdateProvider = StreamProvider.autoDispose((ref) async* {
-      ref.keepAlive();
-      final connection = await ref.read(AppState().connectionProvider.future);
-      final repository = ref.read(AppState().updateRepositoryProvider);
-      final beta = ref.read(AppState().betaFirmwareProvider);
-      if (connection == Connection.connected) {
-        try {
-          final versions = await ref.read(AppState().versionsProvider.future);
-          ref.read(updatingStateProvider.notifier).state = UpdateState.downloading;
-          if (versions is DataSuccess) yield* repository.tryDownloadUpdate(versions.data!.firmware, versions.data!.serial, beta: beta);
-        } catch (e) {
-          // skyleLogger?.i(e.toString());
-        }
-      }
-    });
-
-    late final uploadUpdateProvider = StreamProvider.autoDispose<DataState<UpdateState>>((ref) async* {
-      ref.keepAlive();
-      if (ref.watch(uploadUpdateTriggerProvider)) {
-        try {
-          ref.read(updatingStateProvider.notifier).state = UpdateState.uploading;
-          yield* ref.watch(AppState().updateRepositoryProvider).tryUpdate();
-        } catch (e) {
-          // skyleLogger?.i(e.toString());
-          yield DataFailed(e.toString());
-        }
-      }
-    });
-
-    late final combinedDownloadingAndUploadingUpdateProvider = StreamProvider.autoDispose<DataState<UpdateState>>((ref) async* {
-      final downloadStream = ref.watch(downloadUpdateProvider.stream);
-      final uploadStream = ref.watch(uploadUpdateProvider.stream);
-      yield* StreamGroup.merge([downloadStream, uploadStream]);
-    });
-
-    late final updatingProvider = StreamProvider.autoDispose<DataState<UpdateState>>((ref) async* {
-      final connection = await ref.watch(AppState().connectionProvider.future);
-      if (connection == Connection.connecting) return;
-      if (ref.read(updatingStateProvider) == UpdateState.uploaded && connection == Connection.disconnected) {
-        yield const DataSuccess(UpdateState.updating);
-        ref.read(updatingStateProvider.notifier).state = UpdateState.updating;
-        return;
-      }
-      if (ref.read(updatingStateProvider) == UpdateState.updating && connection == Connection.connected) {
-        yield const DataSuccess(UpdateState.finished);
-        ref.read(updatingStateProvider.notifier).state = UpdateState.none;
-        return;
-      }
-      final updatingStateStream = ref.watch(combinedDownloadingAndUploadingUpdateProvider.stream);
-      await for (final updatingState in updatingStateStream) {
-        if (updatingState is DataSuccess) ref.read(updatingStateProvider.notifier).state = updatingState.data!;
-        yield updatingState;
-      }
-    });
-
-    late final newVersionProvider = FutureProvider.autoDispose<DataState<UpdateResponse>>((ref) async {
-      final connection = await ref.watch(AppState().connectionProvider.future);
-      if (connection == Connection.connecting) return const DataFailed('Not connected');
-      final repository = ref.read(AppState().updateRepositoryProvider);
-      final versions = await ref.watch(AppState().versionsProvider.future);
-      final beta = ref.read(AppState().betaFirmwareProvider);
-      if (versions is DataFailed) return DataFailed('${versions.error}');
-      return repository.tryCheckForUpdate(versions.data!.firmware, versions.data!.serial, beta: beta);
-    });
-
     Routes.dialog();
     return showDialog<void>(
       context: context,
@@ -172,17 +98,16 @@ class SearchForFirmwareUpdateButton extends ConsumerWidget {
       builder: (context) {
         return Consumer(
           builder: (context, ref, child) {
-            // final isBeta = ref.watch(AppState().isBetaProvider).valueOrNull ?? const DataSuccess(false);
             final versions = ref.watch(AppState().versionsProvider).valueOrNull ?? const DataFailed('error');
-            final newVersion = ref.watch(newVersionProvider).valueOrNull ?? const DataFailed('error');
+            final newVersion = ref.watch(AppState().newVersionProvider).valueOrNull ?? const DataFailed('error');
 
-            final updatingState = ref.watch(updatingProvider).valueOrNull ?? const DataSuccess(UpdateState.none);
+            final updatingState = ref.watch(AppState().updatingProvider).valueOrNull ?? const DataSuccess(UpdateState.none);
 
             final downloading = updatingState is DataSuccess && updatingState.data! == UpdateState.downloading ||
-                (updatingState is DataLoading && ref.read(updatingStateProvider) == UpdateState.downloading);
+                (updatingState is DataLoading && ref.read(AppState().updatingStateProvider) == UpdateState.downloading);
             final downloaded = updatingState is DataSuccess && updatingState.data! == UpdateState.downloaded;
             final uploading = updatingState is DataSuccess && updatingState.data! == UpdateState.uploading ||
-                (updatingState is DataLoading && ref.read(updatingStateProvider) == UpdateState.uploading);
+                (updatingState is DataLoading && ref.read(AppState().updatingStateProvider) == UpdateState.uploading);
             final uploaded = updatingState is DataSuccess && updatingState.data! == UpdateState.uploaded;
             final updating = updatingState is DataSuccess && updatingState.data! == UpdateState.updating;
             final finished = updatingState is DataSuccess && updatingState.data! == UpdateState.finished;
@@ -206,7 +131,7 @@ class SearchForFirmwareUpdateButton extends ConsumerWidget {
                     if (!finished)
                       Expanded(
                         flex: 3,
-                        child: _text(updatingState, ref.read(updatingStateProvider) == UpdateState.uploading),
+                        child: _text(updatingState, ref.read(AppState().updatingStateProvider) == UpdateState.uploading),
                       ),
                     const Spacer(),
                     if (finished || failed)
@@ -242,18 +167,8 @@ class SearchForFirmwareUpdateButton extends ConsumerWidget {
                       ),
                     if (downloading || downloaded)
                       _DownloadUploadUpdate(
-                        updatingProvider: updatingProvider,
+                        updatingProvider: AppState().updatingProvider,
                       ),
-                    // if (isBeta is DataSuccess && isBeta.data! && !updating && !uploaded && !uploading && !finished)
-                    //   Row(
-                    //     crossAxisAlignment: CrossAxisAlignment.center,
-                    //     mainAxisAlignment: MainAxisAlignment.center,
-                    //     children: [
-                    //       const Text('Receive beta updates?'),
-                    //       const Spacer(),
-                    //       BetaSwitch(downloadUpdateProvider: downloadUpdateProvider),
-                    //     ],
-                    //   ),
                     const Spacer(),
                     Padding(
                       padding: Responsive.padding(context, const EdgeInsets.fromLTRB(0, 0, 0, 0)),
@@ -300,7 +215,7 @@ class SearchForFirmwareUpdateButton extends ConsumerWidget {
                                   : downloaded
                                       ? () async {
                                           // Trigger Update
-                                          ref.read(uploadUpdateTriggerProvider.notifier).state = true;
+                                          ref.read(AppState().uploadUpdateTriggerProvider.notifier).state = true;
                                         }
                                       : null,
                             ),

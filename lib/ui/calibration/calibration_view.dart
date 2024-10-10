@@ -6,6 +6,7 @@
 
 import 'dart:async';
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -61,6 +62,18 @@ class _CalibrationViewState extends ConsumerState<CalibrationView> with SingleTi
     _buttonandlogovisible = false;
 
     SchedulerBinding.instance.addPostFrameCallback((_) async {
+      skyle.IPadModel model;
+      final deviceInfo = DeviceInfoPlugin();
+      final iosInfo = await deviceInfo.iosInfo;
+      final deviceModel = iosInfo.utsname.machine;
+      model = skyle.IPadModel.values.firstWhere((element) => element.name == deviceModel.replaceAll(',', '_'), orElse: () {
+        print('iPad $deviceModel is not compatible with Skyle');
+        return skyle.IPadModel.iPad13_11;
+      });
+      Size size = Size(model.screenSizeMM.$1, model.screenSizeMM.$2);
+      if (UniversalPlatform.isDesktop) {
+        size = Millimeters.of(context).physical;
+      }
       await Future.delayed(const Duration(milliseconds: 1000));
 
       if (mounted) {
@@ -70,9 +83,7 @@ class _CalibrationViewState extends ConsumerState<CalibrationView> with SingleTi
           });
           final MediaQueryData mediaQuery = MediaQuery.of(context);
           final calibrationPoints = ref.read(AppState().calibrationPointsProvider);
-          print("Starting calibration");
-          final size = Millimeters.of(context).physical;
-          print(size);
+
           return AppState().et.calibration.calibrate(
                 calibrationPoints,
                 screenSizes: skyle.ScreenSizes(

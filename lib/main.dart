@@ -26,23 +26,28 @@ Future<void> main() async {
 
   if (UniversalPlatform.isDesktop) {
     await windowManager.ensureInitialized();
-    const windowOptions = WindowOptions(center: true,
-        minimumSize: Size(1440, 900),
-        titleBarStyle: TitleBarStyle.hidden);
+    const windowOptions = WindowOptions(center: true, minimumSize: Size(1440, 900), titleBarStyle: TitleBarStyle.hidden);
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.show();
       await windowManager.focus();
       await windowManager.setSize(const Size(1440, 900));
     });
-
+  }
+  if (UniversalPlatform.isDesktop) {
+    runApp(
+      Millimeters.fromView(
+        child: GazeContext(
+          sharedPreferences: AppState().sharedPreferences,
+          child: const SkyleApp(),
+        ),
+      ),
+    );
   }
 
   runApp(
-    Millimeters.fromView(
-      child: GazeContext(
-        sharedPreferences: AppState().sharedPreferences,
-        child: const SkyleApp(),
-      ),
+    GazeContext(
+      sharedPreferences: AppState().sharedPreferences,
+      child: const SkyleApp(),
     ),
   );
 }

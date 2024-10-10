@@ -155,12 +155,15 @@ class _SkyleAppState extends ConsumerState<SkyleApp> with WidgetsBindingObserver
                 final deviceInfo = DeviceInfoPlugin();
                 final iosInfo = await deviceInfo.iosInfo;
                 final deviceModel = iosInfo.utsname.machine;
-                final size = Millimeters.of(context).physical;
-
                 model = skyle.IPadModel.values.firstWhere((element) => element.name == deviceModel.replaceAll(',', '_'), orElse: () {
                   print('iPad $deviceModel is not compatible with Skyle');
                   return skyle.IPadModel.iPad13_11;
                 });
+                Size size = Size(model.screenSizeMM.$1, model.screenSizeMM.$2);
+                if (UniversalPlatform.isMacOS) {
+                  size = Millimeters.of(context).physical;
+                }
+
                 await AppState().et.settings.setResolution(
                       screenSizes: skyle.ScreenSizes(
                         resolution: skyle.Size(

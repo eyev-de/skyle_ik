@@ -62,17 +62,21 @@ class _CalibrationViewState extends ConsumerState<CalibrationView> with SingleTi
     _buttonandlogovisible = false;
 
     SchedulerBinding.instance.addPostFrameCallback((_) async {
-      skyle.IPadModel model;
-      final deviceInfo = DeviceInfoPlugin();
-      final iosInfo = await deviceInfo.iosInfo;
-      final deviceModel = iosInfo.utsname.machine;
-      model = skyle.IPadModel.values.firstWhere((element) => element.name == deviceModel.replaceAll(',', '_'), orElse: () {
-        print('iPad $deviceModel is not compatible with Skyle');
-        return skyle.IPadModel.iPad13_11;
-      });
-      Size size = Size(model.screenSizeMM.$1, model.screenSizeMM.$2);
-      if (UniversalPlatform.isDesktop) {
+      Size size;
+      if (UniversalPlatform.isIOS) {
+        skyle.IPadModel model;
+        final deviceInfo = DeviceInfoPlugin();
+        final iosInfo = await deviceInfo.iosInfo;
+        final deviceModel = iosInfo.utsname.machine;
+        model = skyle.IPadModel.values.firstWhere((element) => element.name == deviceModel.replaceAll(',', '_'), orElse: () {
+          print('iPad $deviceModel is not compatible with Skyle');
+          return skyle.IPadModel.iPad13_11;
+        });
+        size = Size(model.screenSizeMM.$1, model.screenSizeMM.$2);
+      } else if (UniversalPlatform.isDesktop) {
         size = Millimeters.of(context).physical;
+      } else {
+        size = Size(300, 200);
       }
       await Future.delayed(const Duration(milliseconds: 1000));
 

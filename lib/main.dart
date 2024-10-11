@@ -26,7 +26,12 @@ Future<void> main() async {
 
   if (UniversalPlatform.isDesktop) {
     await windowManager.ensureInitialized();
-    const windowOptions = WindowOptions(center: true, minimumSize: Size(1440, 900), titleBarStyle: TitleBarStyle.hidden);
+    WindowOptions windowOptions;
+    if (UniversalPlatform.isWindows) {
+      windowOptions = const WindowOptions(center: true, minimumSize: Size(1440, 900), titleBarStyle: TitleBarStyle.normal);
+    } else {
+      windowOptions = const WindowOptions(center: true, minimumSize: Size(1440, 900), titleBarStyle: TitleBarStyle.hidden);
+    }
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.show();
       await windowManager.focus();
@@ -42,12 +47,12 @@ Future<void> main() async {
         ),
       ),
     );
+  } else {
+    runApp(
+      GazeContext(
+        sharedPreferences: AppState().sharedPreferences,
+        child: const SkyleApp(),
+      ),
+    );
   }
-
-  runApp(
-    GazeContext(
-      sharedPreferences: AppState().sharedPreferences,
-      child: const SkyleApp(),
-    ),
-  );
 }

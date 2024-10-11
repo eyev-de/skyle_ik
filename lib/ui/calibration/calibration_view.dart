@@ -62,7 +62,7 @@ class _CalibrationViewState extends ConsumerState<CalibrationView> with SingleTi
     _buttonandlogovisible = false;
 
     SchedulerBinding.instance.addPostFrameCallback((_) async {
-      Size size;
+      Size size = const Size(531, 299);
       if (UniversalPlatform.isIOS) {
         skyle.IPadModel model;
         final deviceInfo = DeviceInfoPlugin();
@@ -75,9 +75,8 @@ class _CalibrationViewState extends ConsumerState<CalibrationView> with SingleTi
         size = Size(model.screenSizeMM.$1, model.screenSizeMM.$2);
       } else if (UniversalPlatform.isDesktop) {
         size = Millimeters.of(context).physical;
-      } else {
-        size = Size(300, 200);
       }
+
       await Future.delayed(const Duration(milliseconds: 1000));
 
       if (mounted) {
